@@ -1,3 +1,8 @@
+// geomod.h
+// Auteurs : Georg Schwabedal et Daniel Silva
+// Version : 
+
+
 #ifndef GEOMOD_H
 #define GEOMOD_H
 #include <array>
@@ -12,21 +17,20 @@ using namespace std;
 
 	double get_epsilon();
 
-	double calculNormeVecteur(double x_1 , double y_1 , double x_2 , double y_2 ) ;
+	double calcul_norme_vecteur(double x1 , double y1 , double x2 , double y2 ) ;
 
 	
-	class Point2D{
+	class Point{
 		public:
 		
-		void setCoordonnes(double x1 , double y1);
-		double getX() ;
-		double getY() ;
-		void setCoordonnesEquivalentes ( int a , int b , double  c) ;
-		void Normalisation(double x3,double y3);
-		void Normalisation(Point2D D);
-		void CoordonnesEquivalentes();
-		double getEquivalent(int a, int b); // Accede au array "equivalent"
-											// Elle est la pour que l'array "equivalent" puisse etre private
+		void set_coordonnes(double x1 , double y1);
+		double get_x() ;
+		double get_y() ;
+		void set_coordonnes_equivalentes ( int a , int b , double  c) ;
+		void normalisation(double x3,double y3);
+		void normalisation(Point D);
+		void coordonnes_equivalentes();
+		double get_equivalent(int a, int b); 
 		
 		private:
 		array<array<double , 2 > , 9 > equivalent;
@@ -37,11 +41,11 @@ using namespace std;
 
 	class Vecteur{ 
 		public: 
-		double getNorme () const;
-		double getVectX () const;
-		double getVectY () const;
-		void NormeVecteur(Point2D Depart, Point2D Arrive);
-		bool egalite(Point2D A, Point2D B);
+		double get_norme () const;
+		double get_vect_x () const;
+		double get_vect_y () const;
+		void norme_vecteur(Point depart, Point arrive);
+		bool egalite(Point A, Point B);
 		
 		
 		private: 
@@ -52,25 +56,25 @@ using namespace std;
 		double x_equivalent_arrive;	
 		double y_equivalent_arrive; 
 		double norme;
-		double vecteurX;
-		double vecteurY;
+		double vecteur_x;
+		double vecteur_y;
 	};
 
 	class Cercle{
 		public:
-		void setCentre(double x1, double x2);
-		void setRayon(double R);
-		Point2D getCentre();
-		double getRayon();
-		bool appartientCercle(Point2D Verificcation);
+		void set_centre(double x1, double x2);
+		void set_rayon(double R);
+		Point get_centre();
+		double get_rayon();
+		bool appartient_cercle(Point verificcation);
 		
 		
 		private:
-		Point2D centre; 
+		Point centre; 
 		double rayon;
 	};
 
 
-	bool IntersectionDeuxCercles(Cercle C_1, Cercle C_2);
+	bool intersection_deux_cercles(Cercle C_1, Cercle C_2);
 
 #endif

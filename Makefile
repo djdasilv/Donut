@@ -1,33 +1,43 @@
 # Definitions de macros
 
-CXX     = g++
-CXXFLAGS = -g -Wall -std=c++11
-CXXFILES = projet.cc message_geomod.cc geomod.cc
-OFILES = projet.o message_geomod.o geomod.o
+#CXX     = g++
+#CXXFLAGS = -g -Wall -std=c++11
+#CXXFILES = projet.cc message_geomod.cc geomod.cc
+#OFILES = projet.o message_geomod.o geomod.o
 
 # Definition de la premiere regle
 
-projet: $(OFILES)
-	$(CXX) $(OFILES) -o projet
+#projet: $(OFILES)
+#	$(CXX) $(OFILES) -o projet
 
 # Definitions de cibles particulieres
 
-depend:
-	@echo " *** MISE A JOUR DES DEPENDANCES ***"
-	@(sed '/^# DO NOT DELETE THIS LINE/q' Makefile && \
-	  $(CXX) -MM $(CXXFLAGS) $(CXXFILES) | \
-	  egrep -v "/usr/include" \
-	 ) >Makefile.new
-	@mv Makefile.new Makefile
+#depend:
+#	@echo " *** MISE A JOUR DES DEPENDANCES ***"
+#	@(sed '/^# DO NOT DELETE THIS LINE/q' Makefile && \
+#	  $(CXX) -MM $(CXXFLAGS) $(CXXFILES) | \
+#	  egrep -v "/usr/include" \
+#	 ) >Makefile.new
+#	@mv Makefile.new Makefile
 
-clean:
-	@echo " *** EFFACE MODULES OBJET ET EXECUTABLE ***"
-	@/bin/rm -f *.o *.x *.cc~ *.h~ prog
+#clean:
+#	@echo " *** EFFACE MODULES OBJET ET EXECUTABLE ***"
+#	@/bin/rm -f *.o *.x *.cc~ *.h~ prog
 
 #
 # -- Regles de dependances generees automatiquement
 #
 # DO NOT DELETE THIS LINE
-projet.o: projet.cc geomod.h message_geomod.h
-message_geomod.o: message_geomod.cc message_geomod.h
-geomod.o: geomod.cc geomod.h
+#projet.o: projet.cc geomod.h message_geomod.h
+#message_geomod.o: message_geomod.cc message_geomod.h
+#geomod.o: geomod.cc geomod.h
+
+
+projet: projet.o message_geomod.o geomod.o
+	g++ projet.o message_geomod.o geomod.o -o projet
+	
+geomod: geomod.cc geomod.h
+	g++ -c geomod.cc
+        
+message_geomod: message_geomod.cc message_geomod.cc
+	g++ -c message_geomod.cc

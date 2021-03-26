@@ -1,3 +1,7 @@
+// projet.cc
+// Auteurs : Georg Schwabedal et Daniel Silva
+// Version : 
+
 #include <iostream>
 #include <vector>
 #include "geomod.h"
@@ -86,10 +90,10 @@ void scenario_1(double init_max){
 
 void scenario_2(double init_max, double init_x, double init_y){
 	set_max(init_max);
-	Point2D p1;
-	p1.setCoordonnes(init_x,init_y);
-	p1.Normalisation(p1);
-	message_geomod::print_point(init_x,init_y, p1.getX(),p1.getY());
+	Point p1;
+	p1.set_coordonnes(init_x,init_y);
+	p1.normalisation(p1);
+	message_geomod::print_point(init_x,init_y, p1.get_x(),p1.get_y());
 }
 
 
@@ -98,18 +102,18 @@ void scenario_2(double init_max, double init_x, double init_y){
 void scenario_3(double init_max, double init_x1, double init_y1,double  init_x2, 
 				double init_y2){
 	set_max(init_max);
-	Point2D p1;
-	p1.setCoordonnes(init_x1, init_y1);
+	Point p1;
+	p1.set_coordonnes(init_x1, init_y1);
 
-	Point2D p2;
-	p2.setCoordonnes(init_x2,init_y2);
+	Point p2;
+	p2.set_coordonnes(init_x2,init_y2);
 	
-	p1.Normalisation(p1);
-	p2.Normalisation(p2);
+	p1.normalisation(p1);
+	p2.normalisation(p2);
 	
 	Vecteur V1;
-	V1.NormeVecteur( p1 , p2 );
-	message_geomod::print_vect( V1.getNorme() , V1.getVectX() , V1.getVectY() );
+	V1.norme_vecteur( p1 , p2 );
+	message_geomod::print_vect( V1.get_norme() , V1.get_vect_x() , V1.get_vect_y() );
 };
 				
 				
@@ -120,11 +124,11 @@ void scenario_4(double init_max, double init_x1, double init_y1, double init_x2,
 				double init_y2){;
 	
 	set_max(init_max);
-	Point2D p1, p2;
-	p1.setCoordonnes(init_x1,init_y1);
-	p2.setCoordonnes(init_x2, init_y2);	
-	p1.Normalisation(p1);
-	p2.Normalisation(p2);
+	Point p1, p2;
+	p1.set_coordonnes(init_x1,init_y1);
+	p2.set_coordonnes(init_x2, init_y2);	
+	p1.normalisation(p1);
+	p2.normalisation(p2);
 	Vecteur W; 
 	message_geomod::print_equal_point	(W.egalite(p1, p2), init_x1,init_y1,init_x2,
 										init_y2);
@@ -136,18 +140,18 @@ void scenario_5(double init_max, double init_x, double init_y, double init_xc,
 
 	
 	set_max(init_max);
-	Point2D p1;
+	Point p1;
 	Cercle c1;
 	
-	p1.setCoordonnes(init_x,init_y);
-	p1.Normalisation(p1);
-	c1.setCentre(init_xc,init_yc);
-	c1.setRayon(init_r);
-	c1.getCentre().Normalisation(c1.getCentre());
+	p1.set_coordonnes(init_x,init_y);
+	p1.normalisation(p1);
+	c1.set_centre(init_xc,init_yc);
+	c1.set_rayon(init_r);
+	c1.get_centre().normalisation(c1.get_centre());
 	
-	message_geomod::print_include_point(c1.appartientCercle (p1), p1.getX(),p1.getY(), 
-										c1.getCentre().getX() ,c1.getCentre().getY() , 
-										c1.getRayon() );				
+	message_geomod::print_include_point(c1.appartient_cercle (p1), p1.get_x(),
+										p1.get_y(), c1.get_centre().get_x() ,
+										c1.get_centre().get_y(), c1.get_rayon() );				
 	};
 			
 			
@@ -157,14 +161,14 @@ void scenario_6(double init_max, double init_xc1, double init_yc1, double init_r
 	
 	set_max(init_max);
 	Cercle c1,c2;
-	c1.setCentre(init_xc1 , init_yc1 );
-	c2.setCentre(init_xc2 , init_yc2 );
-	c1.setRayon(init_r1);
-	c2.setRayon(init_r2);
-	c1.getCentre().Normalisation(c1.getCentre());
-	c2.getCentre().Normalisation(c2.getCentre());
+	c1.set_centre(init_xc1 , init_yc1 );
+	c2.set_centre(init_xc2 , init_yc2 );
+	c1.set_rayon(init_r1);
+	c2.set_rayon(init_r2);
+	c1.get_centre().normalisation(c1.get_centre());
+	c2.get_centre().normalisation(c2.get_centre());
 
-	message_geomod::print_intersect(IntersectionDeuxCercles( c1 , c2 ),init_xc1,
+	message_geomod::print_intersect(intersection_deux_cercles( c1 , c2 ),init_xc1,
 									init_yc1,init_r1,init_xc2,init_yc2,init_r2);
 };
 
