@@ -1,43 +1,36 @@
 # Definitions de macros
 
-#CXX     = g++
-#CXXFLAGS = -g -Wall -std=c++11
-#CXXFILES = projet.cc message_geomod.cc geomod.cc
-#OFILES = projet.o message_geomod.o geomod.o
+CXX     = g++
+CXXFLAGS = -g -Wall -std=c++11
+CXXFILES = projet.cc simulation.cc message.cc gisement.cc geomod.cc base.cc robot.cc
+OFILES = projet.o simulation.o message.o	gisement.o geomod.o	base.o robot.o
 
 # Definition de la premiere regle
 
-#projet: $(OFILES)
-#	$(CXX) $(OFILES) -o projet
+projet: $(OFILES)
+	$(CXX) $(OFILES) -o projet
 
 # Definitions de cibles particulieres
 
-#depend:
-#	@echo " *** MISE A JOUR DES DEPENDANCES ***"
-#	@(sed '/^# DO NOT DELETE THIS LINE/q' Makefile && \
-#	  $(CXX) -MM $(CXXFLAGS) $(CXXFILES) | \
-#	  egrep -v "/usr/include" \
-#	 ) >Makefile.new
-#	@mv Makefile.new Makefile
+depend:
+	@echo " *** MISE A JOUR DES DEPENDANCES ***"
+	@(sed '/^# DO NOT DELETE THIS LINE/q' Makefile && \
+	  $(CXX) -MM $(CXXFLAGS) $(CXXFILES) | \
+	  egrep -v "/usr/include" \
+	 ) >Makefile.new
+	@mv Makefile.new Makefile
 
-#clean:
-#	@echo " *** EFFACE MODULES OBJET ET EXECUTABLE ***"
-#	@/bin/rm -f *.o *.x *.cc~ *.h~ prog
+clean:
+	@echo " *** EFFACE MODULES OBJET ET EXECUTABLE ***"
+	@/bin/rm -f *.o *.x *.cc~ *.h~ prog
 
 #
-# -- Regles de dependances generees automatiquement
-#
-# DO NOT DELETE THIS LINE
-#projet.o: projet.cc geomod.h message_geomod.h
-#message_geomod.o: message_geomod.cc message_geomod.h
-#geomod.o: geomod.cc geomod.h
+#-- Regles de dependances generees automatiquement
 
-
-projet: projet.o message_geomod.o geomod.o
-	g++ projet.o message_geomod.o geomod.o -o projet
-	
-geomod: geomod.cc geomod.h
-	g++ -c geomod.cc
-        
-message_geomod: message_geomod.cc message_geomod.cc
-	g++ -c message_geomod.cc
+ #DO NOT DELETE THIS LINE
+projet.o: projet.cc geomod.h simulation.h message.h
+simulation.o: simulation.cc simulation.h gisement.h geomod.h base.h
+message.o: message.cc message.h
+gisement.o: gisement.cc message.h gisement.h geomod.h
+geomod.o: geomod.cc geomod.h
+base.o: base.cc geomod.h base.h simulation.h gisement.h message.h

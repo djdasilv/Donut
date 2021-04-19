@@ -1,14 +1,12 @@
 // geomod.h
 // Auteurs : Georg Schwabedal et Daniel Silva
-// Version : 
 
 
 #ifndef GEOMOD_H
 #define GEOMOD_H
 #include <array>
 	
-using namespace std;
-		
+
 	bool equal_zero (double verification);
 
 	void set_max(double init_max);
@@ -26,14 +24,14 @@ using namespace std;
 		void set_coordonnes(double x1 , double y1);
 		double get_x() ;
 		double get_y() ;
-		void set_coordonnes_equivalentes ( int a , int b , double  c) ;
-		void normalisation(double x3,double y3);
+		void set_coordonnes_equivalentes ( int a , int b , double& c) ;
+		void normalisation(double& x3,double& y3);
 		void normalisation(Point D);
 		void coordonnes_equivalentes();
 		double get_equivalent(int a, int b); 
 		
 		private:
-		array<array<double , 2 > , 9 > equivalent;
+		std::array<std::array<double , 2 > , 9 > equivalent;
 		double x; 
 		double y;
 	};
@@ -66,7 +64,9 @@ using namespace std;
 		void set_rayon(double R);
 		Point get_centre();
 		double get_rayon();
-		bool appartient_cercle(Point verificcation);
+		bool appartient_cercle(Point& verificcation);
+		double get_x();
+		double get_y();
 		
 		
 		private:
@@ -76,5 +76,6 @@ using namespace std;
 
 
 	bool intersection_deux_cercles(Cercle C_1, Cercle C_2);
+
 
 #endif

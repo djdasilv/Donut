@@ -1,19 +1,19 @@
+// geomod.cc
+// Auteurs : Georg Schwabedal et Daniel Silva
+
 #include <iostream>
 #include <array>
 #include <cmath>
 #include "geomod.h"
+#include "constantes.h"
 
 using namespace std;
 
 
 //Max et epsilon
-// geomod.cc
-// Auteurs : Georg Schwabedal et Daniel Silva
-// Version : 
-
 namespace {
 	double epsilon_zero;
-	double max1; 
+	double max1(dim_max); 
 }
 
 
@@ -44,10 +44,8 @@ double calcul_norme_vecteur(double x1 , double y1 , double x2 , double y2 )
 // Vérifie si une valeur peut être considéré comme nul  
 bool equal_zero ( double verification ) 
 {
-	if (abs(verification) <= epsilon_zero)
-	{
-		return false;
-	}
+	if (abs(verification) <= epsilon_zero)	return false;
+	
 	return true;
 	
 }
@@ -56,9 +54,8 @@ bool equal_zero ( double verification )
 
 bool Vecteur :: egalite(Point A, Point B){
 	norme_vecteur ( A , B ); 
-	if (get_norme () <= epsilon_zero){
-		return true;
-	}
+	
+	if (get_norme () <= epsilon_zero) return true;
 	
 	return false ;
 }
@@ -84,7 +81,7 @@ double Point::get_y() {
 }
 	
 //Normalise les x et y dans le max donné
-void Point::normalisation(double x3, double y3){
+void Point::normalisation(double& x3, double& y3){
 
 	if (x3 > max1)	x = x3 - 2*max1;
 	else if (x3 <-max1)	x = x3 + 2*max1;
@@ -114,9 +111,9 @@ void Point::coordonnes_equivalentes (){
 	};
 }
 
-void Point::set_coordonnes_equivalentes (  int i , int j , double x) {
+void Point::set_coordonnes_equivalentes (  int i , int j , double& x) {
 	equivalent[i][j]=x;
-	cout << equivalent[i][j] << endl;
+	std::cout << equivalent[i][j] << std::endl;
 }
 
 // Fonctions de la classe Vecteur
@@ -153,18 +150,17 @@ void Vecteur::norme_vecteur(Point A, Point B)
 	B.coordonnes_equivalentes ();
 	x_equivalent_arrive = B.get_equivalent(0,0);
 	y_equivalent_arrive = B.get_equivalent(0,1);
-	norme = calcul_norme_vecteur	(x_depart , y_depart , x_equivalent_arrive 
-								,y_equivalent_arrive);
+	norme = calcul_norme_vecteur(	x_depart , y_depart , x_equivalent_arrive ,
+									y_equivalent_arrive);
 
 
-	for ( int i(1); i < 9 ; i++ )  
-		{
-		if ( calcul_norme_vecteur(x_depart, y_depart ,B.get_equivalent(i,0) , 
-								B.get_equivalent(i,1)) < norme )
-			{
+	for ( int i(1); i < 9 ; i++ ) {
+		if ( calcul_norme_vecteur(	x_depart, y_depart ,B.get_equivalent(i,0) , 
+									B.get_equivalent(i,1)) < norme ){
+										
 			x_equivalent_arrive = B.get_equivalent(i,0);
 			y_equivalent_arrive = B.get_equivalent(i,1);
-			norme = calcul_norme_vecteur( x_depart , y_depart , B.get_equivalent(i,0), 
+			norme = calcul_norme_vecteur(x_depart , y_depart , B.get_equivalent(i,0), 
 										B.get_equivalent(i,1));
 			} 
 		}
@@ -176,9 +172,9 @@ void Vecteur::norme_vecteur(Point A, Point B)
 
 //Fonctions de la classe Cercle
 
-void Cercle::set_centre ( double x1 , double x2){
+void Cercle::set_centre ( double x , double y){
 
-	centre.set_coordonnes ( x1 , x2 ); 
+	centre.set_coordonnes ( x , y ); 
 } 
 
 void Cercle::set_rayon ( double R) {
@@ -196,26 +192,29 @@ Point Cercle::get_centre(){
 }
 
 
-bool Cercle::appartient_cercle ( Point A) 
+bool Cercle::appartient_cercle ( Point& A) 
 {
 	Vecteur V;
 	V.norme_vecteur(get_centre(),A); 
-	if ( V.get_norme() < rayon - epsilon_zero) 
-		{
-		return true;	
-	}
+	if ( V.get_norme() < rayon - epsilon_zero) return true;	
+	
 return false;			
 }  
+
+double Cercle::get_x(){
+	
+	return get_centre().get_x();}
+	
+double Cercle::get_y(){
+	
+	return get_centre().get_y();}
 
 bool intersection_deux_cercles ( Cercle C1 , Cercle C2 )
 {
 	Vecteur W;
 	W.norme_vecteur (C1.get_centre() , C2.get_centre()); 
 	
-	if ( W.get_norme() <= C1.get_rayon() + C2.get_rayon() - epsilon_zero) 
-	{
-		return true; 
-	}
+	if ( W.get_norme() <= C1.get_rayon() + C2.get_rayon() - epsilon_zero) return true; 
 	 
 	return false; 
 }
