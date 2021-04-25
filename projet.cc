@@ -1,11 +1,10 @@
 // projet.cc
 // Auteurs : Georg Schwabedal et Daniel Silva
 
+#include <iostream>
 #include "geomod.h"
 #include "simulation.h"
 #include "message.h"
-#include "gisement.h"
-#include <iostream>
 
 using namespace std;
 

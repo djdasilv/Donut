@@ -4,7 +4,6 @@
 #include <vector>
 #include <cmath>
 #include "geomod.h"
-//#include "robot.h"
 
 class Gisement{
 	public: 
@@ -21,10 +20,6 @@ class Gisement{
 	double quantitee_ressources;
 
 };
-
-
-
-
 
 std::vector <Cercle> getPositionsBases ( );
 

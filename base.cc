@@ -1,28 +1,16 @@
-#include <iostream>
-#include <array>
-#include <cmath>
-#include <vector>
-#include "geomod.h"
+// base.cc
+// Auteurs : Georg Schwabedal et Daniel Silva
+
 #include "base.h"
 #include "message.h"
 #include "constantes.h"
 
 
-Cercle Base::getCercle () const 
+Cercle Base::get_cercle () const 
 { 
 	return position;
 }
-/***
-std::vector <Cercle> getPositionsBases ( )
-{ 
-	std::vector <Cercle> PB ;
-	for ( size_t i (0) ; i < liste_base.size() ; ++i)
-	{ 
-		PB.push_back(liste_base[i].getCercle());
-	}
-	return PB;
-}
-***/
+
 Base :: Base ( double x , double y ,  double r , int  P, int F , int T , int C )
 { 
 	nbP =P; 
@@ -35,11 +23,11 @@ Base :: Base ( double x , double y ,  double r , int  P, int F , int T , int C )
 	
 }
 
-double Base::get_x(){
-	return getCercle().get_centre().get_x();
+double Base::get_x() const{
+	return get_cercle().get_centre().get_x();
 	}
-double Base::get_y(){
-	return getCercle().get_centre().get_y();
+double Base::get_y() const{
+	return get_cercle().get_centre().get_y();
 }
 
 
@@ -52,23 +40,34 @@ void Base :: set_ressources( double& ener )
 {
 	ressources = ener; 
 }
-/***
-void Base :: ajout_robot (robot::Robot A)
-{
-	robot::Robot* a; 
-	a = &A;
-	for ( size_t i (0) ; i < robots_base.size() ; i++ ) 
-		{
-			if ( a->get_uid() == robots_base[i]->get_uid() ) 
-			{
-				cout << " uid deja prise " << endl; 
-				exit(0); 
+
+
+Point Base::get_centre() const {
+	return get_cercle().get_centre();
+}
+
+//Verification que au moins un robot comm est present dans la base
+void Base :: robot_comm(vector <Base> listeB) {
+	
+	bool presence_robotC(false);
+		for (size_t i(0); i < robots_base.size(); i++){
+			if (robots_base[i].get_type() == 'C'){
+				Vecteur b;
+				if (b.egalite(get_centre(), robots_base[i].get_centre()) == true ){
+					//base = i;
+					presence_robotC = true;
+			
+				}
 			}
 		}
 	
-	robots_base.push_back(a);
+	if (presence_robotC == false) {
+		cout<<message::missing_robot_communication(get_x(),get_y());
+		exit(EXIT_FAILURE);
+	}
 }
-***/
+
+//Fonction de ajout d'une base a la liste avec toutes les base
 
 void Base :: ajout_base (	std::vector <Base> & liste_base, 
 							std::vector<Gisement>& liste_gisement){
@@ -76,25 +75,26 @@ void Base :: ajout_base (	std::vector <Base> & liste_base,
 	bool intersection_base (false),intersection_gisement(false);
 	int base(0),gisement(0);
 	
+	//Verification d'intersection base-gisement
 	for ( size_t i (0); i < liste_gisement.size() ; i++ ){
-		if (intersection_deux_cercles ( getCercle(), liste_gisement[i].getCercleG()))  {
+		if (intersection_deux_cercles ( get_cercle(), liste_gisement[i].getCercleG())){
 
 				intersection_gisement = true; 
 				gisement= static_cast<int>(i);
 		}
 	}
 	for ( size_t i (0); i < liste_base.size() ; i++ )		{
-		if (intersection_deux_cercles ( getCercle(), liste_base[i].getCercle()))  {
+		if (intersection_deux_cercles ( get_cercle(), liste_base[i].get_cercle()))  {
 
 				intersection_base = true; 
 				base= static_cast<int>(i);			
-			
 		}		
 	}
-			
+	//Verification d'intersection gisement-gisement		
 	if (intersection_gisement==true){
-		std::cout<<message::base_field_superposition(get_x(),get_y(),liste_gisement[gisement].get_x()
-												,liste_gisement[gisement].get_y());
+		std::cout<<message::base_field_superposition(get_x(),get_y(),
+													liste_gisement[gisement].get_x(),
+													liste_gisement[gisement].get_y());
 		exit ( EXIT_FAILURE );
 	}
 	else if (intersection_base==true){
@@ -105,20 +105,23 @@ void Base :: ajout_base (	std::vector <Base> & liste_base,
 	else if ( intersection_base == false) {
 		liste_base.push_back( *this);
 	}
-		
-	
 }
-/***
-bool Base :: PresenceRobotCOM ()
+
+
+//Addition d'un robot a une base et verification de UIDs differents
+void Base :: ajout_robot (Robot a)
 {
-	geomod::Vecteur V; 
-	for ( size_t i (0) ; i < robots_base.size() ; i++ ) 
-	{
-		if ( V.egalite ( getCercle().get_centre() , robots_base[i] -> getRobotCentre() ) and (robots_base[i] -> get_type() == 'C') ) 
-		{
-			return true;  
+
+	bool uid_egal (false);
+	for ( size_t i (0) ; i < robots_base.size() ; i++ ) {
+		if ( a.get_uid() == robots_base[i].get_uid() ){
+			uid_egal = true;
 		}
 	}
-	return false ; 
+	if (uid_egal) {
+			cout<<message::identical_robot_uid(a.get_uid());
+			exit(EXIT_FAILURE); 
+	}
+	
+	robots_base.push_back(a);
 }
-***/
