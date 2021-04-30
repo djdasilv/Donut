@@ -140,11 +140,11 @@ void decodage_ligne2(string line){
 		case ROBOTP:
 			data>>uid>>dp>>x>>y>>xb>>yb>>atteint>>retour>>found;
 			if (found =="false") { 
-				liste_base[base-1].ajout_robot(Prospecteur(uid,dp,x,y,xb,yb,
+				liste_base[base-1].ajout_robot(new Prospecteur(uid,dp,x,y,xb,yb,
 															atteint,retour, found));}		
 			else { 
 				data>>xg>>yg>>rayong>>capaciteg;
-				liste_base[base-1].ajout_robot(Prospecteur(uid,dp,x,y,xb,yb,atteint,
+				liste_base[base-1].ajout_robot(new Prospecteur(uid,dp,x,y,xb,yb,atteint,
 															retour,found,xg,yg,rayong,
 															capaciteg));}
 			if (nb_robots+1==nbP) {
@@ -156,7 +156,7 @@ void decodage_ligne2(string line){
 			
 		case ROBOTF:
 			data>>uid>>dp>>x>>y>>xb>>yb>>atteint;
-			liste_base[base-1].ajout_robot(Forage(uid, dp,x,y,xb,yb,atteint));
+			liste_base[base-1].ajout_robot(new Forage(uid, dp,x,y,xb,yb,atteint));
 			if (nb_robots+1==nbF) {
 				nb_robots=0;
 				set_etat(etat, nbP, nbF, nbT, nbC,base);
@@ -166,7 +166,7 @@ void decodage_ligne2(string line){
 	
 		case ROBOTT:
 			data>>uid>>dp>>x>>y>>xb>>yb>>atteint>>retour;	
-			liste_base[base-1].ajout_robot(Transport(uid,dp,x,y,xb,yb,atteint,retour));
+			liste_base[base-1].ajout_robot(new Transport(uid,dp,x,y,xb,yb,atteint,retour));
 			if (nb_robots+1==nbT) {
 				nb_robots=0;
 				set_etat(etat, nbP, nbF, nbT, nbC,base);			
@@ -176,7 +176,7 @@ void decodage_ligne2(string line){
 			
 		case ROBOTC:
 			data>>uid>>dp>>x>>y>>xb>>yb>>atteint;
-			liste_base[base-1].ajout_robot(Communication(uid,dp,x,y,xb,yb,atteint));
+			liste_base[base-1].ajout_robot(new Communication(uid,dp,x,y,xb,yb,atteint));
 			if (nb_robots+1==nbC) {
 				set_etat(etat, nbP, nbF, nbT, nbC,base);
 				nb_robots=0;				

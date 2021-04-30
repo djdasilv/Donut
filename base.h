@@ -13,7 +13,7 @@ using namespace std;
 		Base ( double x , double y , double r , int  P, int F , int T , int C );
 		double get_ressources() const;
 		void set_ressources ( double& ener );
-		void ajout_robot ( Robot A ); 
+		void ajout_robot ( Robot* A ); 
 		void ajout_base (	std::vector<Base> & liste_base, 
 							std::vector<Gisement>& liste_gisement); 
 		Cercle  get_cercle () const;
@@ -31,7 +31,7 @@ using namespace std;
 		unsigned int nbC;
 		Cercle position;
 		double ressources;
-		vector <Robot > robots_base;
+		vector <Robot* > robots_base;
 	};
 
 vector <Cercle> getPositionsBases ( );

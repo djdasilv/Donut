@@ -1,4 +1,4 @@
-// simulation.h
+// simulation
 // Auteurs : Georg Schwabedal et Daniel Silva
 
 

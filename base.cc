@@ -51,9 +51,9 @@ void Base :: robot_comm(vector <Base> listeB) {
 	
 	bool presence_robotC(false);
 		for (size_t i(0); i < robots_base.size(); i++){
-			if (robots_base[i].get_type() == 'C'){
+			if (robots_base[i] -> get_type() == 'C'){
 				Vecteur b;
-				if (b.egalite(get_centre(), robots_base[i].get_centre()) == true ){
+				if (b.egalite(get_centre(), robots_base[i] -> get_centre()) == true ){
 					//base = i;
 					presence_robotC = true;
 			
@@ -109,19 +109,19 @@ void Base :: ajout_base (	std::vector <Base> & liste_base,
 
 
 //Addition d'un robot a une base et verification de UIDs differents
-void Base :: ajout_robot (Robot a)
+void Base :: ajout_robot ( Robot* A)
 {
 
 	bool uid_egal (false);
 	for ( size_t i (0) ; i < robots_base.size() ; i++ ) {
-		if ( a.get_uid() == robots_base[i].get_uid() ){
+		if ( A -> get_uid() == robots_base[i] -> get_uid() ){
 			uid_egal = true;
 		}
 	}
 	if (uid_egal) {
-			cout<<message::identical_robot_uid(a.get_uid());
+			cout<<message::identical_robot_uid(A -> get_uid());
 			exit(EXIT_FAILURE); 
 	}
 	
-	robots_base.push_back(a);
+	robots_base.push_back( A );
 }
