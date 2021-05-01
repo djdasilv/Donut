@@ -10,7 +10,8 @@ class Robot{
 	
 	
 	public:
-	Robot ( int id ,double p ,double x ,double y ,double x1 ,double y1 ,string at); 	
+	Robot ( int id ,double p ,double x ,double y ,double x1 ,double y1 ,string at);
+	virtual ~ Robot(); 	
 	void set_compteur_energie ( double& ener);
 	double get_compteur_energie () const ;
 	void set_compteur_de_distance ( double& dp ); 
@@ -19,7 +20,7 @@ class Robot{
 	int get_uid () const ; 
 	bool transformationStringBool ( std::string A ) ;
 	char get_type () const;
-	
+	virtual Robot* copie()  = 0;
 	protected:
 	int uid;  
 	double compteur_de_distance;
@@ -39,6 +40,9 @@ class Prospecteur : public Robot
 					
 	Prospecteur(	int id,double par,double x_1,double y_1,double x3,double y3, 
 					string a, string b,string c);
+	~Prospecteur();
+	
+	Robot* copie() ;
 	private: 
 	bool retour;
 	bool found;
@@ -52,6 +56,8 @@ class Forage : public Robot
 {
 	public:
 	Forage (int id,double par,double x_1,double y_1 , double x3,double y3,string a); 
+	Robot* copie() ;
+	~Forage();
 	private :
 };
 
@@ -60,6 +66,8 @@ class Transport : public Robot
 	public:
 	Transport (	int id,double par,double x_1,double y_1,double x3,double y3,string a,
 				string r);
+	Robot* copie()  ;
+	~Transport();
 	private :
 	bool retour; 
 };
@@ -69,6 +77,8 @@ class Communication : public Robot
 	public:
 	Communication (	int id,double par,double x_1,double y_1 , double x3,double y3,
 					string a); 
+	Robot* copie() ;
+	~Communication();
 	private :
 };
 

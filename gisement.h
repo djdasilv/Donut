@@ -10,7 +10,6 @@ class Gisement{
 	Gisement( double x , double y , double r , double qt) ;
 	void set_qt_ressources (double& qt_r) ;
 	double get_qt_resources () const ;
-	void ajout_gisement (std::vector<Gisement> &liste);
 	Cercle getCercleG () const;
 	double get_x();
 	double get_y();
@@ -22,5 +21,7 @@ class Gisement{
 };
 
 std::vector <Cercle> getPositionsBases ( );
+
+void ajout_gisement ( Gisement* A , std::vector< Gisement* > &liste);
 
 #endif

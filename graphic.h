@@ -1,43 +1,17 @@
-#ifndef GRAPHIC_H
-#define GRAPHIC_H
+#ifndef GTKMM_EXAMPLE_MYAREA_H
+#define GTKMM_EXAMPLE_MYAREA_H
 
-#include "geomod.h"
+#include <gtkmm/drawingarea.h>
 
-#include <gtkmm.h>
-using namespace std;
-
-class MyArea : public Gtk::DrawingArea	{
-
-	public:
-	MyArea();
-	virtual ~MyArea();
-	void clear();
-	void draw();
-	protected:
-
-//Override default signal handler:
-	bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) override;
-	private:
-	bool empty;
-	void refresh();
-};
-
-class MyEvent : public Gtk::Window
+class MyArea : public Gtk::DrawingArea
 {
+public:
+  MyArea();
+  virtual ~MyArea();
 
-	public:
-	MyEvent();
-	virtual ~MyEvent();
-	protected:
-	//Button Signal handlers:
-	void on_button_clicked_clear();
-	void on_button_clicked_draw();
-	Gtk::Box m_Box, m_Box_Top, m_Box_Bottom;
-	MyArea m_Area;
-	Gtk::Button m_Button_Clear;
-	Gtk::Button m_Button_Draw;
-	private:
-	void draw();
+protected:
+  //Override default signal handler:
+  bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) override;
 };
 
-#endif
+#endif // GTKMM_EXAMPLE_MYAREA_H

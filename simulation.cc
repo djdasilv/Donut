@@ -14,8 +14,8 @@ namespace{
 						ROBOTP,ROBOTF,ROBOTT,ROBOTC,FIN};
 	
 	
-	static vector < Base > liste_base;
-	static vector < Gisement > liste_gisement; 
+	static vector < Base* > liste_base;
+	static vector < Gisement* > liste_gisement; 
 	
 };
 
@@ -35,7 +35,7 @@ void lecture(char* nom)
         }
     //Verification que toutes les bases ont un robot de comm au centre
     for (size_t i(0); i<liste_base.size(); i++){
-		liste_base[i].robot_comm(liste_base);
+		liste_base[i] -> robot_comm(liste_base);
 	}
 }
 
@@ -94,7 +94,7 @@ void decodage_ligne1(string line){
 		case GISEMENTS:
 			data>>x>>y>>rayon>>ressource;
 			if (g<nombre)	g++;
-			Gisement (x,y,rayon, ressource).ajout_gisement(liste_gisement);
+			ajout_gisement(new Gisement (x,y,rayon, ressource), liste_gisement);
 			if (g==nombre) etat=DEF;
 			break;
 			
@@ -121,13 +121,10 @@ void decodage_ligne2(string line){
 		case BASE:
 			if (base <=nombre){
 				data>>x>>y>>ressource>>nbP>>nbF>>nbT>>nbC;
-				Base (x,y,ressource,nbP,nbF, nbT,nbC).ajout_base(	liste_base, 
-																	liste_gisement);
+				ajout_base( new Base (x,y,ressource,nbP,nbF, nbT,nbC) , liste_base , liste_gisement);
 				if (nbC == 0) {
-					cout<<message::missing_robot_communication(	liste_base[base].
-																get_x(),
-																liste_base[base].
-																get_y());
+					cout<<message::missing_robot_communication(	liste_base[base] -> get_x(),
+																liste_base[base] -> get_y());
 					exit(EXIT_FAILURE);
 				}
 				set_etat(etat, nbP, nbF, nbT, nbC,base);
@@ -140,11 +137,11 @@ void decodage_ligne2(string line){
 		case ROBOTP:
 			data>>uid>>dp>>x>>y>>xb>>yb>>atteint>>retour>>found;
 			if (found =="false") { 
-				liste_base[base-1].ajout_robot(new Prospecteur(uid,dp,x,y,xb,yb,
+				liste_base[base-1] -> ajout_robot(new Prospecteur(uid,dp,x,y,xb,yb,
 															atteint,retour, found));}		
 			else { 
 				data>>xg>>yg>>rayong>>capaciteg;
-				liste_base[base-1].ajout_robot(new Prospecteur(uid,dp,x,y,xb,yb,atteint,
+				liste_base[base-1] -> ajout_robot(new Prospecteur(uid,dp,x,y,xb,yb,atteint,
 															retour,found,xg,yg,rayong,
 															capaciteg));}
 			if (nb_robots+1==nbP) {
@@ -156,7 +153,7 @@ void decodage_ligne2(string line){
 			
 		case ROBOTF:
 			data>>uid>>dp>>x>>y>>xb>>yb>>atteint;
-			liste_base[base-1].ajout_robot(new Forage(uid, dp,x,y,xb,yb,atteint));
+			liste_base[base-1] -> ajout_robot(new Forage(uid, dp,x,y,xb,yb,atteint));
 			if (nb_robots+1==nbF) {
 				nb_robots=0;
 				set_etat(etat, nbP, nbF, nbT, nbC,base);
@@ -166,7 +163,7 @@ void decodage_ligne2(string line){
 	
 		case ROBOTT:
 			data>>uid>>dp>>x>>y>>xb>>yb>>atteint>>retour;	
-			liste_base[base-1].ajout_robot(new Transport(uid,dp,x,y,xb,yb,atteint,retour));
+			liste_base[base-1] -> ajout_robot(new Transport(uid,dp,x,y,xb,yb,atteint,retour));
 			if (nb_robots+1==nbT) {
 				nb_robots=0;
 				set_etat(etat, nbP, nbF, nbT, nbC,base);			
@@ -176,7 +173,7 @@ void decodage_ligne2(string line){
 			
 		case ROBOTC:
 			data>>uid>>dp>>x>>y>>xb>>yb>>atteint;
-			liste_base[base-1].ajout_robot(new Communication(uid,dp,x,y,xb,yb,atteint));
+			liste_base[base-1] -> ajout_robot(new Communication(uid,dp,x,y,xb,yb,atteint));
 			if (nb_robots+1==nbC) {
 				set_etat(etat, nbP, nbF, nbT, nbC,base);
 				nb_robots=0;				

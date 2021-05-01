@@ -48,7 +48,7 @@ Point Robot :: get_centre() const{
 	return pos; 
 }
 	
-
+Robot :: ~Robot() {}
 
 Prospecteur :: Prospecteur (int id,double par,double x_1,double y_1,double x3,
 							double y3,string a,string r,string f,double x4,
@@ -69,22 +69,40 @@ Prospecteur :: Prospecteur (int id,double par,double x_1,double y_1,double x3,
 	found = transformationStringBool(f);
 	type = 'P';
 }
-		
+
+Robot* Prospecteur ::  copie()  {
+	return new Prospecteur(*this);
+}
+	
+Prospecteur :: ~ Prospecteur() {}
 Forage :: Forage (	int id,double par,double x_1,double y_1,double x3,double y3,
 						string a): Robot ( id , par , x_1 ,y_1 ,x3 , y3 , a) {
 	type = 'F';
 }
 
+Robot* Forage::  copie() {
+	return new Forage(*this);
+}
+Forage :: ~ Forage() {}
 Transport :: Transport (int id,double par,double x_1,double y_1,double x3,
 						double y3, string a,string r)
 						: Robot ( id , par , x_1 ,y_1 ,x3 , y3 , a){
 	retour  = transformationStringBool(r);
 	type = 'T';
 }
+ Robot* Transport ::  copie()  {
+	return new Transport(*this);
+}
+
+Transport :: ~Transport() {}
 		
 Communication :: Communication (int id,double par,double x_1,double y_1,double x3,
 								double y3,std::string a)
 								: Robot ( id , par , x_1 ,y_1 ,x3 , y3 , a) {
 	type = 'C';
 }
-		
+Robot* Communication ::  copie() {
+	return new Communication(*this);
+}
+
+Communication :: ~Communication() {}

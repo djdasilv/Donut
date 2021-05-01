@@ -5,12 +5,12 @@
 #include "gisement.h"
 
 
-void Gisement::ajout_gisement (std::vector<Gisement> &liste) 
+void ajout_gisement ( Gisement* A , std::vector< Gisement* > &liste) 
 {
 	bool presence (false);
 	int tmp(0);
 	for ( size_t i (0); i < liste.size() ; i++ ){
-	 if (intersection_deux_cercles ( taille_ressources , liste[i].taille_ressources))  {
+	 if (intersection_deux_cercles ( A -> getCercleG() , liste[i] -> getCercleG()))  {
 
 				presence = true; 
 				tmp= static_cast<int>(i);
@@ -18,11 +18,11 @@ void Gisement::ajout_gisement (std::vector<Gisement> &liste)
 	}
 	if ( presence == false) {
 		
-		liste.push_back(*this);
+		liste.push_back( A );
 		
 	
 	} else {
-		std::cout<<message::field_superposition(taille_ressources.get_x(), taille_ressources.get_y(),liste[tmp].taille_ressources.get_x(),liste[tmp].taille_ressources.get_y());
+		std::cout<<message::field_superposition(A -> getCercleG().get_x(), A -> getCercleG().get_y(),liste[tmp] -> getCercleG().get_x(),liste[tmp] -> getCercleG().get_y());
 		exit ( EXIT_FAILURE ) ;
 	} 
 	

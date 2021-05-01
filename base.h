@@ -14,14 +14,14 @@ using namespace std;
 		double get_ressources() const;
 		void set_ressources ( double& ener );
 		void ajout_robot ( Robot* A ); 
-		void ajout_base (	std::vector<Base> & liste_base, 
-							std::vector<Gisement>& liste_gisement); 
 		Cercle  get_cercle () const;
 		double get_x() const;
 		double get_y() const;
 		Point get_centre() const ;
-		void robot_comm(vector <Base> listeB) ;
-	
+		void robot_comm(vector <Base*> listeB) ;
+		
+		~Base ();
+		Base (const Base& other);
 
 		private:
 		
@@ -34,6 +34,8 @@ using namespace std;
 		vector <Robot* > robots_base;
 	};
 
+		void ajout_base (	Base* A  , std::vector<Base*> & liste_base, 
+							std::vector<Gisement*>& liste_gisement); 
 vector <Cercle> getPositionsBases ( );
  ; 
 

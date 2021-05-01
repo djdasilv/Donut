@@ -47,7 +47,7 @@ Point Base::get_centre() const {
 }
 
 //Verification que au moins un robot comm est present dans la base
-void Base :: robot_comm(vector <Base> listeB) {
+void Base :: robot_comm(vector <Base*> listeB) {
 	
 	bool presence_robotC(false);
 		for (size_t i(0); i < robots_base.size(); i++){
@@ -69,22 +69,24 @@ void Base :: robot_comm(vector <Base> listeB) {
 
 //Fonction de ajout d'une base a la liste avec toutes les base
 
-void Base :: ajout_base (	std::vector <Base> & liste_base, 
-							std::vector<Gisement>& liste_gisement){
+void ajout_base ( Base* A , std::vector <Base*> & liste_base, 
+							std::vector<Gisement*>& liste_gisement){
 
 	bool intersection_base (false),intersection_gisement(false);
 	int base(0),gisement(0);
 	
 	//Verification d'intersection base-gisement
 	for ( size_t i (0); i < liste_gisement.size() ; i++ ){
-		if (intersection_deux_cercles ( get_cercle(), liste_gisement[i].getCercleG())){
+		if (intersection_deux_cercles ( A -> get_cercle(), 
+										liste_gisement[i] -> getCercleG())){
 
 				intersection_gisement = true; 
 				gisement= static_cast<int>(i);
 		}
 	}
 	for ( size_t i (0); i < liste_base.size() ; i++ )		{
-		if (intersection_deux_cercles ( get_cercle(), liste_base[i].get_cercle()))  {
+		if (intersection_deux_cercles ( A -> get_cercle(), 
+										liste_base[i] -> get_cercle()))  {
 
 				intersection_base = true; 
 				base= static_cast<int>(i);			
@@ -92,18 +94,19 @@ void Base :: ajout_base (	std::vector <Base> & liste_base,
 	}
 	//Verification d'intersection gisement-gisement		
 	if (intersection_gisement==true){
-		std::cout<<message::base_field_superposition(get_x(),get_y(),
-													liste_gisement[gisement].get_x(),
-													liste_gisement[gisement].get_y());
+		std::cout<<message::base_field_superposition(A -> get_x(), A -> get_y(),
+													liste_gisement[gisement]->get_x(),
+													liste_gisement[gisement]->get_y());
 		exit ( EXIT_FAILURE );
 	}
 	else if (intersection_base==true){
-		std::cout<<message::base_superposition(get_x(),get_y(),liste_base[base].get_x()
-												,liste_base[base].get_y());
+		std::cout<<message::base_superposition(A -> get_x(), A-> get_y(),
+												liste_base[base] -> get_x(),
+												liste_base[base] -> get_y());
 		exit ( EXIT_FAILURE );
 	} 
 	else if ( intersection_base == false) {
-		liste_base.push_back( *this);
+		liste_base.push_back( A );
 	}
 }
 
@@ -125,3 +128,22 @@ void Base :: ajout_robot ( Robot* A)
 	
 	robots_base.push_back( A );
 }
+
+
+Base :: ~Base ()
+{ 
+	 for(auto rob : robots_base) { 
+		 delete rob;
+	}	 
+}
+
+Base :: Base(const Base& other) 
+	: nbP(other.nbP), nbF(other.nbF), nbT(other.nbT), nbC(other.nbC),
+	position(other.position), ressources(other.ressources) 
+{
+	for (size_t i(0) ; i < robots_base.size() ; ++i) {
+		robots_base.push_back((*(other.robots_base[i])).copie());
+	}
+}
+
+
