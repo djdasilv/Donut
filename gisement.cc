@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-#include "constantes.h"
 #include "message.h"
 #include "gisement.h"
 
@@ -36,16 +35,14 @@ Gisement :: Gisement( double x , double y , double r , double qt)
 	set_qt_ressources(qt) ;
 
 
-};
-
-Gisement:: ~Gisement(){}	
+};	
 
 void Gisement :: set_qt_ressources (double& qt_r)
 {
-	quantitee_ressources = qt_r * pow((rayon_max/rayon_min),2); 
+	quantitee_ressources = qt_r ; 
 };
 
-double Gisement :: get_qt_ressources () const 
+double Gisement :: get_qt_resources () const 
 {
 	return quantitee_ressources;
 };
@@ -65,12 +62,13 @@ double Gisement::get_y(){
 	return getCercleG().get_centre().get_y();
 	}
 	
-	
 double Gisement::get_rayon() {
 	
 	return taille_ressources.get_rayon();
 
-}	
+}		
+	
+	
 /**vector <Cercle> getPositionsBases ( )
 { 
 	vector <Cercle> PG ;

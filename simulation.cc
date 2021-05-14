@@ -4,8 +4,6 @@
 #include <sstream>
 #include <fstream>
 #include "simulation.h"
-#include "base.h"
-#include "message.h"
 
 using namespace std;
 
@@ -13,15 +11,18 @@ namespace{
 	enum Etat_lecture {	NB_GISEMENT,GISEMENTS,NB_BASE,BASE,DEF,
 						ROBOTP,ROBOTF,ROBOTT,ROBOTC,FIN};
 	
-	
-	static vector < Base* > liste_base;
-	static vector < Gisement* > liste_gisement; 
 	static int count(0);
 	static int etat1(NB_GISEMENT), etat2(NB_BASE);
+	static vector < Gisement* > liste_gisement; 
+	static vector < Base* > liste_base;
 	
 };
 
-void lecture(char* nom)
+Simulation::Simulation(){}
+
+Simulation::~Simulation(){}
+
+void Simulation::lecture(char* nom)
 {
 	set_max(dim_max);
     string line;
@@ -53,7 +54,7 @@ void lecture(char* nom)
 }
 
 //Fonction qui definit l'etat du switch de l'automate de lecture
-void set_etat (	int& etat2, double nbP, double nbF, double nbT, double nbC, 
+void Simulation::set_etat (	int& etat2, double nbP, double nbF, double nbT, double nbC, 
 				double bases){
 	switch(etat2){
 		case BASE:
@@ -90,7 +91,7 @@ void set_etat (	int& etat2, double nbP, double nbF, double nbT, double nbC,
 }
 
 //Automate de lecture pour les gisement
-void decodage_ligne1(string line){
+void Simulation::decodage_ligne1(string line){
 	++count;
 	istringstream data(line);
 	static int nombre(0), g(0);	
@@ -120,7 +121,7 @@ void decodage_ligne1(string line){
 }
 
 //Automate de lecture pour les bases et les robots
-void decodage_ligne2(string line){		
+void Simulation::decodage_ligne2(string line){		
 	
 	istringstream data(line);
 	static double x(0) ,y(0) ,ressource(0),nbP(0) , nbT(0), nbC(0), nbF(0), dp(0), uid(0), xb(0), yb(0),
@@ -154,7 +155,7 @@ void decodage_ligne2(string line){
 		case ROBOTP:
 			data>>uid>>dp>>x>>y>>xb>>yb>>atteint>>retour>>found;
 			
-			cout<<uid<<" "<<dp<<"  "<<x<<" "<<y<<endl;
+			cout<<uid<<" "<<dp<<"  "<<x<<" "<<y<<"  "<<xb<<"  "<<yb<<endl;
 			if (found =="false") { 
 				liste_base[base-1] -> ajout_robot(new Prospecteur(uid,dp,x,y,xb,yb,
 															atteint,retour, found));}		
@@ -172,7 +173,7 @@ void decodage_ligne2(string line){
 			
 		case ROBOTF:
 			data>>uid>>dp>>x>>y>>xb>>yb>>atteint;
-			cout<<uid<<" "<<dp<<"  "<<x<<" "<<y<<endl;
+			cout<<uid<<" "<<dp<<"  "<<x<<" "<<y<<"  "<<xb<<"  "<<yb<<endl;
 			liste_base[base-1] -> ajout_robot(new Forage(uid, dp,x,y,xb,yb,atteint));
 			if (nb_robots+1==nbF) {
 				nb_robots=0;
@@ -183,7 +184,7 @@ void decodage_ligne2(string line){
 	
 		case ROBOTT:
 			data>>uid>>dp>>x>>y>>xb>>yb>>atteint>>retour;
-			cout<<uid<<" "<<dp<<"  "<<x<<" "<<y<<endl;	
+			cout<<uid<<" "<<dp<<"  "<<x<<" "<<y<<"  "<<xb<<"  "<<yb<<endl;
 			liste_base[base-1] -> ajout_robot(new Transport(uid,dp,x,y,xb,yb,atteint,retour));
 			if (nb_robots+1==nbT) {
 				nb_robots=0;
@@ -194,7 +195,7 @@ void decodage_ligne2(string line){
 			
 		case ROBOTC:
 			data>>uid>>dp>>x>>y>>xb>>yb>>atteint;
-			cout<<uid<<" "<<dp<<"  "<<x<<" "<<y<<endl;
+			cout<<uid<<" "<<dp<<"  "<<x<<" "<<y<<""<<xb<<"  "<<yb<<endl;
 			liste_base[base-1] -> ajout_robot(new Communication(uid,dp,x,y,xb,yb,atteint));
 			if (nb_robots+1==nbC) {
 				set_etat(etat2, nbP, nbF, nbT, nbC,base);
@@ -206,7 +207,7 @@ void decodage_ligne2(string line){
 	}		
 	
 }
-
+/**
 void effacer(){
 		for (auto gisement : liste_gisement) delete gisement;
 		liste_gisement.clear();
@@ -214,20 +215,36 @@ void effacer(){
 		for (auto base : liste_base) delete base;
 		liste_base.clear();
 		count=0;
-}
+}**/
 
-Gisement* get_gisement(int i){
+Gisement* Simulation::get_gisement(int i){
 	return liste_gisement[i];
 }
 
-Base* get_base(int i){
+Base* Simulation::get_base(int i){
 	return liste_base[i];
 }
 
-size_t gisement_size(){
+size_t Simulation::gisement_size(){
 	return liste_gisement.size();
 }
 
-size_t base_size(){
+size_t Simulation::base_size(){
 	return liste_base.size();
+}
+
+
+
+void TabRobotsConnectBases()
+{
+	for ( size_t a(0) ; a < liste_base.size() ; a++) 
+		{
+			for ( size_t b(0) ; b < liste_base[a]->robots_base.size(); b++) 
+			{
+				if(liste_base[a] -> robots_base[b]-> get_comm_Base() ) 
+				{
+					rec_DEF(liste_base[a] , liste_base[a] -> robots_base[b]);
+				}
+			} 
+		}
 }

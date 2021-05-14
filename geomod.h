@@ -6,6 +6,8 @@
 #define GEOMOD_H
 #include <array>
 #include "constantes.h"
+#include <cstdlib>
+#include <ctime>
 	
 
 bool equal_zero (double verification);
@@ -27,7 +29,6 @@ class Point{
 	double get_y() ;
 	void set_coordonnes_equivalentes ( int a , int b , double& c) ;
 	void normalisation(double& x3,double& y3);
-	
 	void normalisation(Point D);
 	void coordonnes_equivalentes();
 	double get_equivalent(int a, int b); 
@@ -75,8 +76,8 @@ class Cercle{
 	double rayon;
 };
 
-	void normalisation(double& x3);
-	bool intersection_deux_cercles(Cercle C_1, Cercle C_2);
 
+	bool intersection_deux_cercles(Cercle C_1, Cercle C_2);
+	int randomNb ( int b );
 
 #endif

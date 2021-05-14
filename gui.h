@@ -1,19 +1,21 @@
 #include <gtkmm.h>
 #include <gtkmm/window.h>
+#include "simulation.h"
+
+#ifndef GTK_COMPATIBILITY_MODE
 
 #define GTK_COMPATIBILITY_MODE
-
-#ifdef GTK_COMPATIBILITY_MODE
 
 class MyArea : public Gtk::DrawingArea
 {
 public:
 	MyArea();
 	virtual ~MyArea();
-	int ConvertX(double coord);
-	int ConvertY(double coord);
-	int ConvertRadius(double rayon);
-	static void orthographic_projection(const Cairo::RefPtr<Cairo::Context>& cr, double width, double height);
+	void refresh();
+	
+	static void orthographic_projection(const Cairo::RefPtr<Cairo::Context>& cr,
+										double width, double height);
+	
 
 
 protected:
@@ -74,27 +76,31 @@ private:
 class Windowx : public Gtk::Window
 {
 public:
-  Windowx();
-  virtual ~Windowx();
+	  Windowx();
+	  virtual ~Windowx();
+	  //void set_simulation(Simulation* simulation);
+	  //Simulation* get_simulation();
 
 protected:
+	Simulation* simulation;
   //Signal handlers:
-  void on_button_clicked();
+	bool on_idle();
+	void on_button_clicked();
 
-  //Child widgets:
-  Scroll scroll;
-  MyArea Area;
-  Gtk::Box m_box, m_box_Bottom, m_box_Top, m_box_Button, m_box_General, m_box_Display,
-		m_box_Draw;
-  Gtk::Frame m_Frame_Horizontal, m_Frame_Vertical;
-  Gtk::Label m_Label_LineWrapped;
+	  //Child widgets:
+	  Scroll scroll;
+	  MyArea Area;
+	  Gtk::Box m_box, m_box_Bottom, m_box_Top, m_box_Button, m_box_General, 
+	  m_box_Display,m_box_Draw;
+	  Gtk::Frame m_Frame_Horizontal, m_Frame_Vertical;
+	  Gtk::Label m_Label_LineWrapped;
 };
 
 //Classe pour tous les boutons generaux
 class ButtonBox : public Gtk::Frame
 {
 public:
-  ButtonBox(bool horizontal, const Glib::ustring& title, gint spacing, 
+	ButtonBox(bool horizontal, const Glib::ustring& title, gint spacing, 
 			Gtk::ButtonBoxStyle layout);
 	void on_button_clicked_Exit(), on_button_clicked_Open(), on_button_clicked_Save(),
 		on_button_clicked_Start(), on_button_clicked_Step();
@@ -120,7 +126,8 @@ protected:
 	
 };
 
-
+void set_simulation(Simulation* simulation);
 void dessin_cercle(const Cairo::RefPtr<Cairo::Context>& cr,int x,int y,int rayon);
+void save(char* filename);
 
 #endif //GTKMM_EXAMPLEWINDOW_H
