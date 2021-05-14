@@ -5,7 +5,7 @@
 #include <array>
 #include <cmath>
 #include "geomod.h"
-#include "constantes.h"
+
 
 using namespace std;
 
@@ -90,6 +90,11 @@ void Point::normalisation(double& x3, double& y3){
 	else if (y3 < -max1)	y = y3 + 2*max1;
 }
 
+void normalisation(double& x3){
+		
+		if (x3 > max1)	x3 = x3 - 2*max1;
+	else if (x3 <-max1)	x3 = x3 + 2*max1;
+	}
 
 // Normalisation par surchage du point 
 void Point::normalisation(Point D) {
@@ -113,7 +118,7 @@ void Point::coordonnes_equivalentes (){
 
 void Point::set_coordonnes_equivalentes (  int i , int j , double& x) {
 	equivalent[i][j]=x;
-	std::cout << equivalent[i][j] << std::endl;
+	//std::cout << equivalent[i][j] << std::endl;
 }
 
 // Fonctions de la classe Vecteur

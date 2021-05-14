@@ -1,11 +1,27 @@
 #include <gtkmm.h>
-
 #include <gtkmm/window.h>
-#include "graphic.h"
 
 #define GTK_COMPATIBILITY_MODE
 
 #ifdef GTK_COMPATIBILITY_MODE
+
+class MyArea : public Gtk::DrawingArea
+{
+public:
+	MyArea();
+	virtual ~MyArea();
+	int ConvertX(double coord);
+	int ConvertY(double coord);
+	int ConvertRadius(double rayon);
+	static void orthographic_projection(const Cairo::RefPtr<Cairo::Context>& cr, double width, double height);
+
+
+protected:
+  //Override default signal handler:
+  bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) override;
+};
+
+
 
 class Scroll : public Gtk::Frame
 {
@@ -21,9 +37,6 @@ private:
 
   //Signal handlers:
   void on_button_clicked();
-
-  //Member widgets:
-  Gtk::Button m_button;
   
   // necessary for the project: internal class for private use of scrolledWindow
   class Model_columns : public Gtk::TreeModel::ColumnRecord
@@ -83,10 +96,12 @@ class ButtonBox : public Gtk::Frame
 public:
   ButtonBox(bool horizontal, const Glib::ustring& title, gint spacing, 
 			Gtk::ButtonBoxStyle layout);
-
+	void on_button_clicked_Exit(), on_button_clicked_Open(), on_button_clicked_Save(),
+		on_button_clicked_Start(), on_button_clicked_Step();
 protected:
 	Gtk::Button m_Button_Exit,m_Button_Start,m_Button_Open, m_Button_Step, 
 				m_Button_Save;
+	Gtk::Label m_Label_Info;
 };
 
 
@@ -94,14 +109,18 @@ protected:
 class ButtonBox2 : public Gtk::Frame
 {
 public:
-  ButtonBox2(	bool horizontal, const Glib::ustring& title, gint spacing,
+	ButtonBox2(	bool horizontal, const Glib::ustring& title, gint spacing,
 				Gtk::ButtonBoxStyle layout);
-
+	
+	void on_button_clicked_Link(), on_button_clicked_Range();
+	
 protected:
 	Gtk::Button m_Button_Link,m_Button_Range;
+	
+	
 };
 
 
-
+void dessin_cercle(const Cairo::RefPtr<Cairo::Context>& cr,int x,int y,int rayon);
 
 #endif //GTKMM_EXAMPLEWINDOW_H

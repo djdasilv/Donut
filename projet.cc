@@ -16,20 +16,19 @@ using namespace std;
 // lit le fichier dont le nom est transmis sur la ligne de commande
 int main(int argc, char * argv[])
 {
-	//if(argc != 2) exit(EXIT_FAILURE);
+	auto app= Gtk::Application::create();  	//Fonctionne mais pas sur que soit juste
+	if(argc == 2) {
+		lecture(argv[1]);
+	}	
 	
+	else {
+		app = Gtk::Application::create(argc, argv, "org.gtkmm.example");
+		//cout<<"2"<<endl;
+		
+	}
 	
-	auto app = Gtk::Application::create(argc, argv, "org.gtkmm.example");
-
-	Windowx window;
-	window.set_default_size(900, 900);
-
-	return app->run(window);
-	
-	//lecture(argv[1]);
-	
-
-	cout<<message::success();
-
-	return EXIT_SUCCESS;
+		Windowx window;
+		window.set_default_size(900, 900);
+return app->run(window);	
 }
+

@@ -1,35 +1,52 @@
 #include "graphic.h"
-#include <cairomm/context.h>
+#include <stdlib.h>
 
-MyArea::MyArea()
-{
+using namespace std;
+
+
+
+
+
+void dessin_cercle(	const Cairo::RefPtr<Cairo::Context>& cr,int height,int width,int x ,int y, int rayon)
+{	
+
+	cr->arc(x, y,  rayon , 0.0, 2.0 * M_PI); 
+	cr->stroke();
+
+	cr->arc(x+2*dim_max, y,  rayon , 0.0, 2.0 * M_PI); 
+	cr->stroke();
+
+	cr->arc(x+2*dim_max, y+2*dim_max,  rayon , 0.0, 2.0 * M_PI); 
+	cr->stroke();
+
+	cr->arc(x+2*dim_max, y-2*dim_max,  rayon , 0.0, 2.0 * M_PI); 
+	cr->stroke();
+
+	cr->arc(x, y+2*dim_max,  rayon , 0.0, 2.0 * M_PI); 
+	cr->stroke();
+
+	cr->arc(x, y-2*dim_max,  rayon , 0.0, 2.0 * M_PI); 
+	cr->stroke();
+
+	cr->arc(x-2*dim_max, y,  rayon , 0.0, 2.0 * M_PI); 
+	cr->stroke();
+
+	cr->arc(x-2*dim_max, y+2*dim_max,  rayon , 0.0, 2.0 * M_PI); 
+	cr->stroke();
+
+	cr->arc(x-2*dim_max, y-2*dim_max,  rayon , 0.0, 2.0 * M_PI); 
+	cr->stroke();
 }
 
-MyArea::~MyArea()
-{
+
+void dessin_ligne(const Cairo::RefPtr<Cairo::Context>& cr,int x,int y){
+	cr->line_to(x,y);
+	cr-> stroke();
+
 }
 
-bool MyArea::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
-{
-  Gtk::Allocation allocation = get_allocation();
-  const int width = allocation.get_width();
-  const int height = allocation.get_height();
+void dessin_point(const Cairo::RefPtr<Cairo::Context>& cr,int x, int y){
+	cr->arc(x, y,  1, 0.0, 2.0 * M_PI);
+	cr->stroke();
 
-  // coordinates for the center of the window
-  int xc, yc;
-  xc = width / 2;
-  yc = height / 2;
-
-  cr->set_line_width(10.0);
-
-  // draw red lines out from the center of the window
-  cr->set_source_rgb(0.8, 0.0, 0.0);
-  cr->move_to(0, 0);
-  cr->line_to(xc, yc);
-  cr->line_to(0, height);
-  cr->move_to(xc, yc);
-  cr->line_to(width, yc);
-  cr->stroke();
-
-  return true;
-}
+	}

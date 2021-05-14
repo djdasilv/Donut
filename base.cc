@@ -26,6 +26,7 @@ Base :: Base ( double x , double y ,  double r , int  P, int F , int T , int C )
 double Base::get_x() const{
 	return get_cercle().get_centre().get_x();
 	}
+	
 double Base::get_y() const{
 	return get_cercle().get_centre().get_y();
 }
@@ -42,7 +43,7 @@ void Base :: set_ressources( double& ener )
 }
 
 
-Point Base::get_centre() const {
+Point Base::get_centre()  {
 	return get_cercle().get_centre();
 }
 
@@ -146,4 +147,10 @@ Base :: Base(const Base& other)
 	}
 }
 
+size_t Base::get_nb_robot() const {
+	return robots_base.size();
+}
 
+Robot* Base :: get_robot(int i) const{
+	return robots_base[i];
+}

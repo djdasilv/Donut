@@ -20,7 +20,10 @@ class Robot{
 	int get_uid () const ; 
 	bool transformationStringBool ( std::string A ) ;
 	char get_type () const;
+	double get_x() const;
+	double get_y() const;
 	virtual Robot* copie()  = 0;
+	
 	protected:
 	int uid;  
 	double compteur_de_distance;

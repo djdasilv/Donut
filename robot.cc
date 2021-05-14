@@ -46,7 +46,16 @@ double Robot :: get_compteur_de_distance () const{
 	
 Point Robot :: get_centre() const{
 	return pos; 
+	
 }
+
+double Robot::get_x() const{
+	return get_centre().get_x();
+}
+
+double Robot::get_y() const {
+	return get_centre().get_y();
+}	
 	
 Robot :: ~Robot() {}
 

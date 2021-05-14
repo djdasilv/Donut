@@ -2,7 +2,6 @@
 #define BASE_H
 
 #include "geomod.h"
-#include "simulation.h"
 #include "robot.h"
 #include "gisement.h"
 
@@ -17,8 +16,10 @@ using namespace std;
 		Cercle  get_cercle () const;
 		double get_x() const;
 		double get_y() const;
-		Point get_centre() const ;
+		Point get_centre() ;
 		void robot_comm(vector <Base*> listeB) ;
+		size_t get_nb_robot() const;
+		Robot* get_robot(int i) const;
 		
 		~Base ();
 		Base (const Base& other);
