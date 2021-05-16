@@ -41,8 +41,8 @@ Windowx::Windowx()
 	m_box_Button.add(m_box_General);
 	m_box_Button.add(m_box_Display);
 	m_box_Bottom.add(scroll);
-	//simulation= get_simulation();
-
+	Area.set_size_request(taille_dessin, taille_dessin);
+	
 	//Ajoute les boutons de General et Toggle Display dans un box
 	m_box_General.pack_start(	*Gtk::manage( new ButtonBox(false, "General", 5,
 			Gtk::BUTTONBOX_SPREAD)), Gtk::PACK_EXPAND_WIDGET);
@@ -52,17 +52,13 @@ Windowx::Windowx()
 
 	m_box_Top.add(m_Frame_Horizontal);
 	//Ce frame contient la surface de dessin 
-
+	//set_default_size(dim_max, dim_max);
 	m_Frame_Horizontal.add(Area);
-    m_Frame_Horizontal.set_hexpand(true);
-  // int width(800),height(width); 
-  
-  m_box_Display.set_halign(Gtk::ALIGN_FILL);
+    m_Frame_Horizontal.set_hexpand(true); 
    
     m_Frame_Horizontal.set_halign(Gtk::ALIGN_FILL);
-   m_Frame_Horizontal.set_vexpand(true);
+	m_Frame_Horizontal.set_vexpand(true);
     m_Frame_Horizontal.set_valign(Gtk::ALIGN_FILL);
-    // m_Frame_Horizontal.set_default_size(800, 800);
   show_all_children();
   
   // updating a simulation in idle signal handler - called as quickly as possible
@@ -72,11 +68,6 @@ Windowx::Windowx()
 
 Windowx::~Windowx()
 {
-}
-
-void Windowx::on_button_clicked()
-{
-  cout<<"coucou"<<endl;
 }
 
 bool Windowx::on_idle()
@@ -89,7 +80,6 @@ bool Windowx::on_idle()
   if(started)
   {
 	cout << "Mise à jour de la simulation numéro : " << ++count << endl;
-	++count3;
 	std::this_thread::sleep_for(std::chrono::milliseconds(1));
   }
   else if (step)
@@ -123,22 +113,11 @@ struct SimData
 
 Scroll::Scroll()
      :_v_box(Gtk::ORIENTATION_VERTICAL, 10)
-   //   m_button("Add one more"), count(0)
 {
-
-  // When the button receives the "clicked" signal, it will call the
-  // on_button_clicked() method defined below.
-  //m_button.signal_clicked().connect(sigc::mem_fun(*this,
-             // &Scroll::on_button_clicked));
-
   add(_v_box);
- 
-  // This packs the buttonfirst into the vertical box
-  //_v_box.add(m_button);
-  
   // This is the part for the scrolled_window
   _v_box.add(_scrolled_window);
-  _scrolled_window.set_size_request(-1, 200);  // replace 500 by -1 for the project
+  _scrolled_window.set_size_request(-1, 200); 
   _scrolled_window.add(_tree_view);
 
   _scrolled_window.set_policy(Gtk::PolicyType::POLICY_AUTOMATIC,
@@ -164,23 +143,6 @@ Scroll::Scroll()
 
 Scroll::~Scroll(){}
 
-// ==================== to adapt for the project  =====================================
-// in this simple example, the button action increases a counter each time it is
-// used. Then it asks to update the diaplay of the table of values.
-// HOWEVER, for the project, many other causes should lead to such an update: file
-// reading, simulation update, etc... For these reason the call to tree_view_update()
-// should be done in the method on_draw of your GUI.
-
-
-
-void Scroll::on_button_clicked()
-{
-  ++count;
-  std::cout << "count value is now " << count << std::endl;
-    
-  tree_view_update(); // for the project, move this call in on_draw()
-}
-
 
 // the declaration below should not exist in your gui module; instead you should have a
 // local vector declared in the method tree_view_update() and such a vector such be
@@ -197,22 +159,16 @@ void Scroll::tree_view_update()
   Glib::RefPtr<Gtk::ListStore> ref_tree_model = Gtk::ListStore::create(_columns);
   _tree_view.set_model(ref_tree_model);
 
-  if(true) // here there should be a test about the existence of a simulation
+  if(sim->simulation()) // here there should be a test about the existence of a simulation
   {
-	// here a call to a method from your simulation class should create and 
-	// return a vector like report, except its number of lines will be
-	// determined by the simulation (not a constant like in this toy example).
-	if(count2 > report.size()) 
-		std::cout << max_tab << " lines max are displayed" << std::endl;
-
-	for(size_t i = 0 ; i < count2 and i <report.size() ; ++i)
+	for(size_t i = 0 ; i <sim->base_size() ; i++)
 	{
-	  report[i].nbP = i;
-	  report[i].nbF = i;
-	  report[i].nbT = i;
-	  report[i].nbC = i;
-	  report[i].ressource   = 1000*i;
-	  report[i].ressource_p = 10*i;
+	  report[i].nbP = sim->get_base(i)->get_nbP();
+	  report[i].nbF = sim->get_base(i)->get_nbF();
+	  report[i].nbT = sim->get_base(i)->get_nbT();
+	  report[i].nbC = sim->get_base(i)->get_nbC();
+	  report[i].ressource   = sim->get_base(i)->get_ressources();
+	  report[i].ressource_p = report[i].ressource *100/finR;
 		
 	  auto row = *(ref_tree_model->append());
 	  row[_columns._col_nbP] = report[i].nbP;
@@ -231,14 +187,14 @@ ButtonBox::ButtonBox(	bool horizontal, const Glib::ustring& title,
 									gint spacing,  Gtk::ButtonBoxStyle layout)
 : 	Gtk::Frame(title),
 	m_Button_Exit("Exit"),
-	m_Button_Start("Start"),
+
 	m_Button_Open("Open"),
 	m_Button_Step("Step"),
 	m_Button_Save("Save")
 
 {
 	Gtk::ButtonBox* bbox = nullptr;
-
+	m_Button_Start.set_label("Start");
 	bbox = Gtk::manage( new Gtk::ButtonBox(Gtk::ORIENTATION_VERTICAL) );
 
 	bbox->set_border_width(5);
@@ -332,9 +288,9 @@ void ButtonBox::on_button_clicked_Save(){
 			char argv[line.length()+1];	
 			char* filename = argv;
 			for (size_t i=0; i< line.length(); i++) argv[i]= line[i];
+			
 			argv[line.length()]= '\0';
-			save(filename);
-			cout<<sim<<endl;	 	
+			saveGisement(filename);
 
 			break;
 		}
@@ -349,12 +305,15 @@ void ButtonBox::on_button_clicked_Save(){
 	}
 }
 
-
 void ButtonBox::on_button_clicked_Start(){ 
-started=not(started);}
+	started=not(started);
+	if (started) m_Button_Start.set_label("Stop");
+	else m_Button_Start.set_label("Start");
+}
 
 void ButtonBox::on_button_clicked_Step(){
-	step=not(step);}
+	step=not(step);
+}
 
 //Fonctions de la ButtonBox contenant les boutons Toggle link et Toggle range
 
@@ -383,63 +342,32 @@ ButtonBox2::ButtonBox2(	bool horizontal, const Glib::ustring& title,
 
 void ButtonBox2::on_button_clicked_Link(){
 	link2=not (link2);
-	cout<<"Link: "<<link2;};
+	}
 
 void ButtonBox2::on_button_clicked_Range(){
 	range=not(range);
-	cout<<"Range: "<<range;};
+}
 
 //Fonctions de la DrawingArea
 
-MyArea::MyArea()
-{
-	
-}
+MyArea::MyArea(){}
 
-MyArea::~MyArea()
-{
-}
+MyArea::~MyArea(){}
 
 bool MyArea::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 {
-    //scroll.tree_view_update();
 	Gtk::Allocation allocation = get_allocation();
 	const int width = allocation.get_width();
 	const int height = allocation.get_height();	
-	
+	graphic_set_context(cr);
 	orthographic_projection(cr,DEFAULT_SIZE, DEFAULT_SIZE);
+	dessin_cadre(height,width);
 	
-  //Desssine les gisements
-  
-	for (size_t i(0); i<sim->gisement_size(); i++){
-
-		sim->get_gisement(i)->getCercleG().get_centre().normalisation( sim->get_gisement(i)->
-																getCercleG().
-																get_centre());
-		if(range){
-		dessin_cercle(	cr,height,width,sim->get_gisement(i)->get_x()+count3, 
-						sim->get_gisement(i)->get_y(), sim->get_gisement(i)->get_rayon());}
-		dessin_point(cr, sim->get_gisement(i)->get_x(), sim->get_gisement(i)->get_y());
-	}
+	draw_gisements(height,width);
+	draw_bases(height, width);
+	cr->set_source_rgb(0,0,0);
 	
-	//Dessine les bases
-	for (size_t i(0); i<sim->base_size(); i++){ 
 
-		sim->get_base(i)->get_centre().normalisation(sim->get_base(i)->get_centre());
-		
-		dessin_point(cr, sim->get_base(i)->get_x(),sim->get_base(i)->get_y());
-		dessin_cercle(	cr,height,width,sim->get_base(i)->get_x(),sim->get_base(i)->get_y(),
-						rayon_base);
-		//Dessine les robots
-		for(size_t j(0);j <sim-> get_base(i)->get_nb_robot(); j++){
-			int rayon_robot(30);
-			if (sim->get_base(i)->get_robot(j)->get_type() == 'C') rayon_robot = 100;
-			if (range){
-				dessin_cercle(cr, height,width,sim->get_base(i)->get_robot(j)->get_x(),sim->get_base(i)->get_robot(j)->get_y(),rayon_robot);
-			}
-		}
-
-}
 	
   return true;
 }
@@ -472,22 +400,26 @@ void MyArea::refresh()
   }
 }
 
-void set_simulation(Simulation* simulation2){
-	sim = simulation2 ;
+void set_simulation(Simulation* simulation){
+	sim = simulation ;
 }
 
-void save(char* filename){
-	enum ETAT{ RC, RF, RT, RP};
-	int robot(RP);
+void saveGisement(char* filename){
 	ofstream myfile;
 	myfile.open (filename);
-	myfile<<sim->gisement_size()<<"\n";
+	if (sim->gisement_size()>0) myfile<<sim->gisement_size()<<"\n";
 	for (size_t i(0); i< sim->gisement_size(); i++){
 		myfile<<sim->get_gisement(i)->get_x()<< " ";
 		myfile<<sim->get_gisement(i)->get_y()<<" ";
 		myfile<<sim->get_gisement(i)->get_rayon()<<" ";
 		myfile<< sim->get_gisement(i)->get_qt_resources()<<"\n";}
-	myfile<<sim->base_size()<<"\n";
+	if (sim->base_size()>0) myfile<<sim->base_size()<<"\n";
+	saveBase(filename,myfile);
+}
+
+
+
+void saveBase(char* filename, ofstream& myfile ){
 	for (size_t i(0); i< sim->base_size() ; i++){
 		myfile<<sim->get_base(i)->get_x() <<" "<<sim->get_base(i)->get_y()<<" ";
 		myfile<<sim->get_base(i)->get_ressources()<<" "; 
@@ -495,35 +427,83 @@ void save(char* filename){
 		myfile<<sim->get_base(i)->get_nbF()<<" ";
 		myfile<<sim->get_base(i)->get_nbT()<<" ";
 		myfile<<sim->get_base(i)->get_nbC()<<"\n";
-		for (size_t j(0); j <sim->get_base(i)->get_nb_robot(); j++ ){
+		
+		for (int j(0); j <sim->get_base(i)->get_nb_robot(); j++ ){
 			myfile<<sim->get_base(i)->get_robot(j)->get_uid()<<" ";
 			myfile<<sim->get_base(i)->get_robot(j)->get_compteur_de_distance ()<<" ";
 			myfile<<sim->get_base(i)->get_robot(j)->get_x()<<" ";
 			myfile<<sim->get_base(i)->get_robot(j)->get_y()<<" ";
 			myfile<<sim->get_base(i)->get_robot(j)->get_but().get_x()<<" ";
 			myfile<<sim->get_base(i)->get_robot(j)->get_but().get_y()<<" ";
-			if(j+1==sim->get_base(i)->get_nbF()) robot = RF;
+			myfile<<boolToString(sim->get_base(i)->get_robot(j)->get_atteint())<<" ";
 			
-			switch(robot){
-				case(RP):
-					myfile<<sim->get_base(i)-> get_robot(j)->get_retour()<<" ";
-					if ((sim->get_base(i)-> get_robot(j)->get_found())=="false"){
-						 myfile<<"false"<<"\n";
-						 break;
-					}else{
-						myfile<< "true"<<sim->get_base(i)->get_robot(j)->get_xg()<<" ";
-						myfile<<sim->get_base(i)-> get_robot(j)->get_yg();
-						myfile<<sim->get_base(i)-> get_robot(j)->get_rayong();
-						myfile<<sim->get_base(i)-> get_robot(j)->get_capaciteg(); }
-					break;
-				case(RF):
-					break;
-				case(RC):
-					break;
-				}
-			}
+			if(sim->get_base(i)->get_robot(j)->get_type() == 'P' ){
 				
-		}
+				myfile<<boolToString(sim->get_base(i)-> get_robot(j)->get_retour());
+				myfile<<" ";
+				myfile<<boolToString(sim->get_base(i)-> get_robot(j)->get_found());
+				
+				if (sim->get_base(i)-> get_robot(j)->get_found()==true  ){
+					myfile<< "true"<<sim->get_base(i)->get_robot(j)->get_xg()<<" ";
+					myfile<<sim->get_base(i)-> get_robot(j)->get_yg()<<" ";
+					myfile<<sim->get_base(i)-> get_robot(j)->get_rayong()<<" ";
+					myfile<<sim->get_base(i)-> get_robot(j)->get_capaciteg()<< "\n";}
+				
+				else {myfile <<"\n";}
 			
+			} else if (sim->get_base(i)->get_robot(j)->get_type() == 'T'){
+				
+				myfile<<boolToString(sim->get_base(i)->get_robot(j)->get_retour());
+				myfile<<"\n";
+			
+			} else if (	(sim->get_base(i)->get_robot(j)->get_type() == 'C') or 
+						(sim->get_base(i)->get_robot(j)->get_type() == 'F')){
+				myfile<<"\n";}
+			}		
+		}	
 	myfile.close();
 }
+
+string boolToString(bool a){
+	if(a == false) return "false";
+	else return "true";
+}
+
+void draw_bases(int height, int width){
+	for (size_t i(0); i<sim->base_size(); i++){ 
+		
+		sim->get_base(i)->get_centre().normalisation(sim->get_base(i)->get_centre());
+		
+		dessin_point(sim->get_base(i)->get_x(),sim->get_base(i)->get_y());
+		set_couleur_base(i+1);
+		dessin_base(height,width,sim->get_base(i)->get_x(),sim->get_base(i)->get_y(),
+						10*rayon_base);
+		//Dessine les robots
+		for(int j(0);j <sim-> get_base(i)->get_nb_robot(); j++){
+			dessin_point(sim->get_base(i)->get_robot(j)->get_x(),sim->get_base(i)->get_robot(j)->get_y());
+			int rayon_robot(300);
+			if (range and sim->get_base(i)->get_robot(j)->get_type() =='C' ){
+				dessin_base(height,width,sim->get_base(i)->get_robot(j)->get_x(),sim->get_base(i)->get_robot(j)->get_y(),rayon_robot);
+			}
+		}
+
+	}
+	
+}
+void draw_gisements(int height, int width){
+	//Desssine les gisements
+  
+	for (size_t i(0); i<sim->gisement_size(); i++){
+
+		sim->get_gisement(i)->getCercleG().get_centre().normalisation( sim->get_gisement(i)->
+																getCercleG().
+																get_centre());
+		dessin_gisement(height,width,sim->get_gisement(i)->get_x(), 
+						sim->get_gisement(i)->get_y(), sim->get_gisement(i)->get_rayon());
+	}
+}
+/***
+void draw(int height, int width,int base){
+	for(int i(0); i<sim->get_base(i))// Completer boucle pour parcourir tou les robots qui sont connectés
+	dessin_liens()}
+**/

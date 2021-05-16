@@ -21,7 +21,7 @@ class Simulation{
 	
 	Simulation();
 	~Simulation();
-
+	bool simulation();
 	void lecture(char* nom);
 	void set_etat (	int& etat, double nbP, double nbF, double nbT, double nbC,double bases);
 	void decodage_ligne1(string line);
@@ -38,12 +38,6 @@ class Simulation{
 	vector < Base* > liste_base;
 
 };
-
-
-	
-
-	
-void effacer();	
 	 
 	
 	

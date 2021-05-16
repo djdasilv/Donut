@@ -25,7 +25,6 @@ int main(int argc, char * argv[])
 	Windowx window;
 
 	Simulation* sim = new Simulation(simulation);
-	cout<<" Simulation: "<<sim->base_size()<<endl; 
 	set_simulation(sim);
 	window.set_default_size(900, 900);
 

@@ -21,6 +21,7 @@ Base :: Base ( double x , double y ,  double r , int  P, int F , int T , int C )
 	position.set_centre (x, y);
 	position.set_rayon(rayon_base);
 	set_ressources (r); 
+	ressources= iniR;
 	
 }
 
@@ -188,7 +189,7 @@ void rec_DEF(Base* B  , Robot* A )
 		}
 	}
 
-size_t Base::get_nb_robot() const {
+int Base::get_nb_robot() const {
 	return robots_base.size();
 }
 
@@ -196,7 +197,7 @@ Robot* Base :: get_robot(int i) const{
 	return robots_base[i];
 }
 
-int Base::get_nbF(){
+int Base::get_nbF() const{
 	return nbF;
 }
 

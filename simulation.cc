@@ -13,14 +13,14 @@ namespace{
 	
 	static int count(0);
 	static int etat1(NB_GISEMENT), etat2(NB_BASE);
-	static vector < Gisement* > liste_gisement; 
-	static vector < Base* > liste_base;
 	
 };
 
 Simulation::Simulation(){}
 
 Simulation::~Simulation(){}
+
+bool Simulation::simulation(){return true;}
 
 void Simulation::lecture(char* nom)
 {
@@ -34,23 +34,16 @@ void Simulation::lecture(char* nom)
 		// ligne de commentaire à ignorer, on passe à la suivante
 		if(line[0]=='#')  continue; 
 		decodage_ligne1(line);
-		//cout<<base_size()<<endl;
         }
     //Verification que toutes les bases ont un robot de comm au centre
     for (size_t i(0); i<liste_base.size(); i++){
 		liste_base[i] -> robot_comm(liste_base);
-		
-		cout<<"Nb de robots: "<<liste_base[0]->get_nb_robot()<<endl;
-	
-	for( size_t i (0); i<liste_gisement.size(); i++){
-		cout<<get_gisement(i)->get_rayon()<<endl;
 	}
 	//Remises des etats a leur valeur initiales afin de permettre 
 	//la lecture d'un deuxieme fichier
 	etat1= NB_GISEMENT;
 	etat2= NB_BASE;
 	
-	}
 }
 
 //Fonction qui definit l'etat du switch de l'automate de lecture
@@ -105,7 +98,7 @@ void Simulation::decodage_ligne1(string line){
 			
 		case GISEMENTS:
 			data>>x>>y>>rayon>>ressource;
-			cout << x <<" "<< y <<endl;
+	//		cout << x <<" "<< y <<endl;
 			if (g<nombre) g++;
 			ajout_gisement(new Gisement (x,y,rayon, ressource), liste_gisement);
 			if (g==nombre) etat1=DEF;
@@ -138,7 +131,7 @@ void Simulation::decodage_ligne2(string line){
 		case BASE:
 			if (base <=nombre){
 				data>>x>>y>>ressource>>nbP>>nbF>>nbT>>nbC;
-				cout << x << " "<< y<< " "<< ressource<< " "<<nbP<<" "<<nbF<<" "<<nbT<<" "<< nbC<<endl; 
+		//		cout << x << " "<< y<< " "<< ressource<< " "<<nbP<<" "<<nbF<<" "<<nbT<<" "<< nbC<<endl; 
 				ajout_base( new Base (x,y,ressource,nbP,nbF, nbT,nbC) , liste_base , liste_gisement);
 				if (nbC == 0) {
 					cout<<message::missing_robot_communication(	liste_base[base] -> get_x(),
@@ -155,7 +148,7 @@ void Simulation::decodage_ligne2(string line){
 		case ROBOTP:
 			data>>uid>>dp>>x>>y>>xb>>yb>>atteint>>retour>>found;
 			
-			cout<<uid<<" "<<dp<<"  "<<x<<" "<<y<<"  "<<xb<<"  "<<yb<<endl;
+			//cout<<uid<<" "<<dp<<"  "<<x<<" "<<y<<"  "<<xb<<"  "<<yb<<endl;
 			if (found =="false") { 
 				liste_base[base-1] -> ajout_robot(new Prospecteur(uid,dp,x,y,xb,yb,
 															atteint,retour, found));}		
@@ -173,7 +166,7 @@ void Simulation::decodage_ligne2(string line){
 			
 		case ROBOTF:
 			data>>uid>>dp>>x>>y>>xb>>yb>>atteint;
-			cout<<uid<<" "<<dp<<"  "<<x<<" "<<y<<"  "<<xb<<"  "<<yb<<endl;
+			//cout<<uid<<" "<<dp<<"  "<<x<<" "<<y<<"  "<<xb<<"  "<<yb<<endl;
 			liste_base[base-1] -> ajout_robot(new Forage(uid, dp,x,y,xb,yb,atteint));
 			if (nb_robots+1==nbF) {
 				nb_robots=0;
@@ -184,7 +177,7 @@ void Simulation::decodage_ligne2(string line){
 	
 		case ROBOTT:
 			data>>uid>>dp>>x>>y>>xb>>yb>>atteint>>retour;
-			cout<<uid<<" "<<dp<<"  "<<x<<" "<<y<<"  "<<xb<<"  "<<yb<<endl;
+		//	cout<<uid<<" "<<dp<<"  "<<x<<" "<<y<<"  "<<xb<<"  "<<yb<<endl;
 			liste_base[base-1] -> ajout_robot(new Transport(uid,dp,x,y,xb,yb,atteint,retour));
 			if (nb_robots+1==nbT) {
 				nb_robots=0;
@@ -195,7 +188,7 @@ void Simulation::decodage_ligne2(string line){
 			
 		case ROBOTC:
 			data>>uid>>dp>>x>>y>>xb>>yb>>atteint;
-			cout<<uid<<" "<<dp<<"  "<<x<<" "<<y<<""<<xb<<"  "<<yb<<endl;
+		//	cout<<uid<<" "<<dp<<"  "<<x<<" "<<y<<""<<xb<<"  "<<yb<<endl;
 			liste_base[base-1] -> ajout_robot(new Communication(uid,dp,x,y,xb,yb,atteint));
 			if (nb_robots+1==nbC) {
 				set_etat(etat2, nbP, nbF, nbT, nbC,base);
@@ -207,15 +200,6 @@ void Simulation::decodage_ligne2(string line){
 	}		
 	
 }
-/**
-void effacer(){
-		for (auto gisement : liste_gisement) delete gisement;
-		liste_gisement.clear();
-		
-		for (auto base : liste_base) delete base;
-		liste_base.clear();
-		count=0;
-}**/
 
 Gisement* Simulation::get_gisement(int i){
 	return liste_gisement[i];
@@ -235,7 +219,7 @@ size_t Simulation::base_size(){
 
 
 
-void TabRobotsConnectBases()
+void Simulation::TabRobotsConnectBases()
 {
 	for ( size_t a(0) ; a < liste_base.size() ; a++) 
 		{

@@ -31,6 +31,13 @@ class Robot{
 	
 	Point get_centre() const;
 	Point get_but () const; 
+	double get_xg() const;
+	double get_yg() const;
+	bool get_retour() const;
+	bool get_found() const;
+	double get_rayong() const;
+	double get_capaciteg() const;
+	
 	
 	bool transformationStringBool ( std::string A ) ;
 	bool get_comm_Base () const;
@@ -89,6 +96,7 @@ class Prospecteur : public Robot
 	double get_yg () const;
 	double get_taille () const;
 	double get_capacite () const;
+	
 	
 	Robot* copie() ;
 	

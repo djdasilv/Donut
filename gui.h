@@ -78,22 +78,19 @@ class Windowx : public Gtk::Window
 public:
 	  Windowx();
 	  virtual ~Windowx();
-	  //void set_simulation(Simulation* simulation);
-	  //Simulation* get_simulation();
 
 protected:
 	Simulation* simulation;
   //Signal handlers:
 	bool on_idle();
-	void on_button_clicked();
 
 	  //Child widgets:
-	  Scroll scroll;
-	  MyArea Area;
-	  Gtk::Box m_box, m_box_Bottom, m_box_Top, m_box_Button, m_box_General, 
-	  m_box_Display,m_box_Draw;
-	  Gtk::Frame m_Frame_Horizontal, m_Frame_Vertical;
-	  Gtk::Label m_Label_LineWrapped;
+	Scroll scroll;
+	MyArea Area;
+	Gtk::Box m_box, m_box_Bottom, m_box_Top, m_box_Button, m_box_General,  
+	m_box_Display,m_box_Draw;
+	Gtk::Frame m_Frame_Horizontal, m_Frame_Vertical;
+	//Gtk::Label m_Label_LineWrapped;
 };
 
 //Classe pour tous les boutons generaux
@@ -121,13 +118,18 @@ public:
 	void on_button_clicked_Link(), on_button_clicked_Range();
 	
 protected:
-	Gtk::Button m_Button_Link,m_Button_Range;
+	Gtk::ToggleButton m_Button_Link,m_Button_Range;
 	
 	
 };
 
+void draw_bases(int height, int width);
+void draw_gisements(int height , int width);
+void draw_link(int height,int width,int base);
 void set_simulation(Simulation* simulation);
-void dessin_cercle(const Cairo::RefPtr<Cairo::Context>& cr,int x,int y,int rayon);
-void save(char* filename);
+void saveGisement(char* filename);
+void saveBase(char* filename,ofstream& myfile);
+
+string boolToString(bool a);
 
 #endif //GTKMM_EXAMPLEWINDOW_H

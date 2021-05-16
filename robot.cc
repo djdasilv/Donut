@@ -13,6 +13,7 @@ Robot::Robot ( 	int id , double p , double x , double y , double x1 , double y1,
 	but.set_coordonnes(x1,y1);
 	compteur_de_distance=p;
 	uid=id;
+	atteint= transformationStringBool(at);
 }
 	
 int Robot :: get_uid () const	{
@@ -83,6 +84,27 @@ Point Robot :: get_centre() const{
 
 Robot :: ~Robot() {}
 
+double Robot::get_xg() const {
+	return get_but().get_x();
+}
+
+double Robot::get_yg() const {
+	return get_but().get_y();
+}
+
+double Robot::get_rayong() const{
+	return 0;
+}
+double Robot::get_capaciteg() const{
+	return 0;
+}
+
+bool Robot::get_found() const{
+	return false;}
+
+bool Robot::get_retour() const {
+	return false;}
+
 //=========================================================Prospecteur====================================================================================
 
 Prospecteur :: Prospecteur (int id,double par,double x_1,double y_1,double x3,
@@ -103,6 +125,8 @@ Prospecteur :: Prospecteur (int id,double par,double x_1,double y_1,double x3,
 	retour = transformationStringBool(r);
 	found = transformationStringBool(f);
 	type = 'P';
+	atteint = transformationStringBool(a);
+	
 }
 
 Robot* Prospecteur ::  copie()  {
@@ -167,11 +191,6 @@ double Prospecteur :: get_xg () const{ return xg ; }
 double Prospecteur :: get_yg () const{ return yg ; }
 double Prospecteur :: get_taille () const{ return taille ; }
 double Prospecteur :: get_capacite () const{ return capacite ; }
-	
-
-
-
-
 
 
 //=========================================================Forage====================================================================================
@@ -193,6 +212,8 @@ Transport :: Transport (int id,double par,double x_1,double y_1,double x3,
 						: Robot ( id , par , x_1 ,y_1 ,x3 , y3 , a){
 	retour  = transformationStringBool(r);
 	type = 'T';
+	atteint = transformationStringBool(a) ;
+	retour = transformationStringBool(r);
 }
  Robot* Transport ::  copie()  {
 	return new Transport(*this);
@@ -207,6 +228,7 @@ Communication :: Communication (int id,double par,double x_1,double y_1,double x
 								: Robot ( id , par , x_1 ,y_1 ,x3 , y3 , a) {
 	type = 'C';
 	robot_base = false; 
+	atteint = transformationStringBool(a);
 }
 
 Robot* Communication ::  copie() {
