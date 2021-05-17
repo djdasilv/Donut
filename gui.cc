@@ -14,6 +14,20 @@
 
 using namespace std;
 
+#define GTK_COMPATIBILITY_MODE
+
+#ifdef GTK_COMPATIBILITY_MODE
+namespace Gtk
+{
+  template<class T, class... T_Args>
+  auto make_managed(T_Args&&... args) -> T*
+  {
+    return manage(new T(std::forward<T_Args>(args)...));
+  }
+}
+#endif
+
+
 namespace {
 	size_t count2(4);
 	int DEFAULT_SIZE = 800;
