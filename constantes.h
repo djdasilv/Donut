@@ -8,7 +8,6 @@ constexpr double display_rayon_robot(0.15);         // km
 constexpr double rayon_base(1);                     // km
 constexpr double rayon_comm(300.);                  // km
 
-constexpr int	 taille_dessin(800);		      	// pixels
 constexpr double deltaD(5.);                        // km
 constexpr double maxD_prosp(10 * dim_max);          // km
 constexpr double maxD_forage(1.42 * dim_max);       // km
@@ -27,4 +26,5 @@ constexpr double cost_com(iniR/1000.);              // ktonne
 
 constexpr unsigned max_line(200);
 
+constexpr int taille_dessin (800); 					// pixels 
 #endif // CONSTANTES_H_INCLUDED

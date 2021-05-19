@@ -5,7 +5,6 @@
 #ifndef GEOMOD_H
 #define GEOMOD_H
 #include <array>
-#include "constantes.h"
 #include <cstdlib>
 #include <ctime>
 	
@@ -79,5 +78,6 @@ class Cercle{
 
 	bool intersection_deux_cercles(Cercle C_1, Cercle C_2);
 	int randomNb ( int b );
+	void normalisationGlobal(double& x3,double& y3);
 
 #endif

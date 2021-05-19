@@ -24,8 +24,8 @@ int main(int argc, char * argv[])
 		
 	Windowx window;
 
-	Simulation* sim = new Simulation(simulation);
-	set_simulation(sim);
+	Simulation* sim = new Simulation(simulation);		//on initialise une instance de sim et de window 
+	set_simulation(sim);								// passe le pointeur sim au module gui 
 	window.set_default_size(900, 900);
 
-	return app->run(window);}
+return app->run(window);}

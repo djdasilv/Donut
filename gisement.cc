@@ -28,6 +28,12 @@ void ajout_gisement ( Gisement* A , std::vector< Gisement* > &liste)
 	
 };
 
+double Gisement::get_rayon() {
+	
+	return taille_ressources.get_rayon();
+
+}		
+
 Gisement :: Gisement( double x , double y , double r , double qt)
 {
 	taille_ressources.set_centre( x , y );
@@ -61,12 +67,6 @@ double Gisement::get_x(){
 double Gisement::get_y(){
 	return getCercleG().get_centre().get_y();
 	}
-	
-double Gisement::get_rayon() {
-	
-	return taille_ressources.get_rayon();
-
-}		
 	
 	
 /**vector <Cercle> getPositionsBases ( )

@@ -24,42 +24,72 @@ using namespace std;
 		double get_ressources() const;
 		double get_x() const;
 		double get_y() const;
+		double get_nb_robot () ; 
+		int get_set_nv_max_uid ();
+		bool get_4G () ; 
 		
-		void robot_comm(vector <Base*> listeB) ;
-		void maj_gisements_connus ();  
-		void set_ressources ( double& ener );
-		void ajout_robot ( Robot* A ); 
-		
-		int get_nb_robot() const;
-		Robot* get_robot(int i) const;
-		
-		~Base ();
-		Base (const Base& other);
-
-		public:
-		int get_nbP() const;
+		int get_nbP() const; 
 		int get_nbC() const;
 		int get_nbT() const;
 		int get_nbF() const;
 		
+		bool get_vie () ;
+		void set_vie ( bool a );
+		Point GisementPlusLoin () ; 
+		
+		void robot_comm(vector <Base*> listeB) ;
+//		void maj_gisements_connus ();  
+		void set_ressources ( double& ener );
+		void MaJNbRobType (); 
+		void ajout_robot ( Robot* A ); 
+		void Creation4G ();
+		void maintenance () ; 
+		void launch4G_3_supplemetaires ();
+		void add_gisement_connus (); 
+		void commande_gisement () ; 
+		void trouver_max_uid ();
+		void FindActive4G () ; 
+		void ViderRobotsT () ; 
+		void TabRemoteOrAutonomous ();
+		void lancement_p();
+		bool decision_interet_gisement ( double x , double y , double r , double c ) ; 
+		int generate_uid () ;
+		int get_nb_robot() const;
+		Robot* get_robot(int i) const;
+
+		
+		~Base ();
+		Base (const Base& other);
+
+		
 		vector < Robot* > robots_base; // faudra le remettre dans private plus tard
 		vector < Robot* > robots_connect;
-
+		vector < Robot* > robot_communication;
+		vector < Robot* > robots_remote;  
+		vector < Robot* > robots_autonomous;
+		std::array<std::array<double , 3 > , 50 > Monde4G;
+		
 		private:
 		
+		int max_uid; 
 		unsigned int nbP;
 		unsigned int nbF;
 		unsigned int nbT;
 		unsigned int nbC;
 		Cercle position;
 		double ressources;
+		bool Active4G; 
+		bool vie; 
 	};
 
-		void ajout_base (	Base* A  , std::vector<Base*> & liste_base, 
-							std::vector<Gisement*>& liste_gisement); 
+//		void ajout_base (	Base* A  , std::vector<Base*> & liste_base, 
+//							std::vector<Gisement*>& liste_gisement); 
 		
 		vector <Cercle> getPositionsBases ( );
-
-		void update_voisins ( Base* A , Base* B );
-		void rec_DEF(Base* B  , Robot* A ); 
+		void rec_DEF( Base* B , Robot* A );
+		
 #endif
+
+
+/**		void update_voisins ( Base* A , Base* B );
+		void rec_DEF(Base* B  , Robot* A ); **/

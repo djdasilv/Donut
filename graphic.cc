@@ -110,6 +110,16 @@ void dessin_cadre(int height, int width){
 	(*ptcr)->set_source_rgb(0,0,0);
 	(*ptcr)->set_line_width(2.0);
 }
+void dessin_robotC(int height,int width,int x,int y,int rayon){
+	(*ptcr)->set_source_rgb(0.5,0,1);
+	for (double i = 0; i < 2*M_PI; i=i+0.6)
+	{
+		(*ptcr)->arc(x, y,  30 , i, i+0.3);
+		(*ptcr)->stroke();
+	}
+	(*ptcr)->set_source_rgb(0,0,0);
+}
+
 
 void set_couleur_base(int i){
 	int valeur = i%7;

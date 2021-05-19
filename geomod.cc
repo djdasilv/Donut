@@ -5,7 +5,7 @@
 #include <array>
 #include <cmath>
 #include "geomod.h"
-
+#include "constantes.h"
 
 using namespace std;
 
@@ -108,7 +108,7 @@ void Point::coordonnes_equivalentes (){
 		get_x() + 2* max1 		, get_y() - 2* max1 ,
 		get_x() - 2* max1 		, get_y() + 2* max1 ,
 		get_x() 				, get_y() 
-	};
+	};  
 }
 
 void Point::set_coordonnes_equivalentes (  int i , int j , double& x) {
@@ -225,4 +225,13 @@ int randomNb ( int b )
   int randomNumber;
   randomNumber = (rand() % b) + 1;
   return randomNumber;
+}
+
+void normalisationGlobal(double& x3, double& y3){
+
+	if (x3 > max1)	x3 = x3 - 2*max1;
+	else if (x3 <-max1)	x3 = x3 + 2*max1;
+	
+	if (y3 > max1)	y3 = y3 - 2*max1;
+	else if (y3 < -max1)	y3 = y3 + 2*max1;
 }
