@@ -4,30 +4,6 @@
 #include "message.h"
 #include "gisement.h"
 
-
-void ajout_gisement ( Gisement* A , std::vector< Gisement* > &liste) 
-{
-	bool presence (false);
-	int tmp(0);
-	for ( size_t i (0); i < liste.size() ; i++ ){
-	 if (intersection_deux_cercles ( A -> getCercleG() , liste[i] -> getCercleG()))  {
-
-				presence = true; 
-				tmp= static_cast<int>(i);
-			}	
-	}
-	if ( presence == false) {
-		
-		liste.push_back( A );
-		
-	
-	} else {
-		std::cout<<message::field_superposition(A -> getCercleG().get_x(), A -> getCercleG().get_y(),liste[tmp] -> getCercleG().get_x(),liste[tmp] -> getCercleG().get_y());
-		exit ( EXIT_FAILURE ) ;
-	} 
-	
-};
-
 double Gisement::get_rayon() {
 	
 	return taille_ressources.get_rayon();

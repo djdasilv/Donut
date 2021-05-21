@@ -24,6 +24,4 @@ class Gisement{
 
 std::vector <Cercle> getPositionsBases ( );
 
-void ajout_gisement ( Gisement* A , std::vector< Gisement* > &liste);
-
 #endif

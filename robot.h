@@ -15,33 +15,35 @@ class Robot{
 	virtual ~ Robot(); 	
 	virtual Robot* copie()  = 0;
 	
-	void set_compteur_energie ( double& ener);
 	void set_compteur_de_distance ( double dp ); 
 	void set_robot_base ( bool f); 
-	void deplacement_vers_but ();
 	void set_but ( double x3 , double y3); 
 	void set_but ( Point A ); 
 	void set_Connect( bool a );
-	void set_retour ( bool b ) ;  
+	void set_retour ( bool b ) ; 
+	void set_jus ( bool b ) ; 
 	void rentrer_base ();
 	void set_base ( double xb , double yb ) ;
-	double get_compteur_energie () const ;
 	double get_compteur_de_distance () const;
 	int get_uid () const ; 
 	
+	virtual void deplacement_vers_but () = 0;
+	
 	Point get_centre() const;
 	Point get_But () const; 
+	Robot* get_voisin(int i) const;
+	int voisin_size()const;
 	
 	bool transformationStringBool ( std::string A ) ;
 	bool get_Comm_Base () const;
 	bool get_Connect () ; 
 	bool get_retour () ; 
 	bool get_atteint () ; 
-	
+	bool get_jus () ; 
 	char get_type (); 
 	
-	virtual void mode_autonome( Gisement* C ) = 0;  
-	virtual void mode_remote ( Gisement* C ) = 0;
+	virtual void mode_autonome( vector < Robot* >& rob , vector < Gisement* > tabg ) = 0;  
+	virtual void mode_remote ( vector < Robot* >& rob , vector < Gisement* > tabg ) = 0;
 	virtual double P_get_xg () {return 0;};
 	virtual double P_get_yg () { return 0;};
 	virtual double P_get_taille () {return 0;};
@@ -62,7 +64,6 @@ class Robot{
 	int uid;  
 	
 	double compteur_de_distance;
-	double compteur_energie;
 	double x_base;
 	double y_base; 
 	
@@ -75,6 +76,7 @@ class Robot{
 	bool Connect;
 	bool retour; 
 	bool robot_base;
+	bool jus ; 
 };
 
 
@@ -91,8 +93,8 @@ class Prospecteur : public Robot
 	~Prospecteur();
 	 
 	
-	void mode_autonome(  Gisement* G ) override; 
-	void mode_remote ( Gisement* C );
+	void mode_autonome( vector < Robot* >& rob , vector < Gisement* > tabg ) override; 
+	void mode_remote ( vector < Robot* >& rob , vector < Gisement* > tabg);
 	void set_found ( bool i ); 
 	void set_xg ( double x1 );
 	void set_yg ( double y1 );
@@ -107,6 +109,8 @@ class Prospecteur : public Robot
 	double get_yg () const;
 	double get_taille () const;
 	double get_capacite () const;***/
+
+	virtual void deplacement_vers_but () override;
 
 	virtual double P_get_xg () override;
 	virtual double P_get_yg () override;
@@ -133,10 +137,12 @@ class Forage : public Robot
 	Forage (int id,double par,double x_1,double y_1 , double x3,double y3,string a); 
 	Robot* copie() ;
 	~Forage();
-	void mode_autonome ( Gisement* C ) override;
-	void mode_remote ( Gisement* C ) override;
+	void mode_autonome (vector < Robot* >& rob , vector < Gisement* > tabg) override;
+	void mode_remote ( vector < Robot* >& rob ,vector < Gisement* > tabg ) override;
 	void GisementPlein ( Gisement*C ) ; 
 	void forage ( Gisement* A ) ; 
+
+	virtual void deplacement_vers_but () override;
 	
 	virtual double P_get_xg () override;
 	virtual double P_get_yg () override;
@@ -158,8 +164,10 @@ class Transport : public Robot
 				string r);
 	Robot* copie()  ;
 	~Transport();
-	void mode_autonome( Gisement* C ) override;
-	void mode_remote ( Gisement* C );
+	void mode_autonome( vector < Robot* >& rob ,vector < Gisement* > tabg ) override;
+	void mode_remote ( vector < Robot* >& rob ,vector < Gisement* > tabg );
+
+	virtual void deplacement_vers_but () override;
 	
 	virtual double P_get_xg () override;
 	virtual double P_get_yg () override;
@@ -173,6 +181,7 @@ class Transport : public Robot
 };
 
 
+
 class Communication : public Robot
 {
 	public:
@@ -180,8 +189,10 @@ class Communication : public Robot
 					string a); 
 	Robot* copie() ;
 	~Communication();
-	void mode_autonome( Gisement* C ) override;
-	void mode_remote ( Gisement* C ) override; 
+	void mode_autonome( vector < Robot* >& rob ,vector < Gisement* > tabg ) override;
+	void mode_remote ( vector < Robot* >& rob ,vector < Gisement* > tabg ) override; 
+
+	virtual void deplacement_vers_but () override;
 	
 	virtual double P_get_xg () override;
 	virtual double P_get_yg () override;

@@ -7,6 +7,7 @@
 #include <array>
 #include <cstdlib>
 #include <ctime>
+#include "graphic.h"
 	
 
 bool equal_zero (double verification);
@@ -31,6 +32,7 @@ class Point{
 	void normalisation(Point D);
 	void coordonnes_equivalentes();
 	double get_equivalent(int a, int b); 
+	void dessin(char C, int rayon);
 		
 	private:
 	std::array<std::array<double , 2 > , 9 > equivalent;
@@ -46,6 +48,7 @@ class Vecteur{
 	double get_vect_y () const;
 	void norme_vecteur(Point depart, Point arrive);
 	bool egalite(Point A, Point B);
+	void dessin();
 		
 	private: 
 	double x_depart;
@@ -68,6 +71,7 @@ class Cercle{
 	bool appartient_cercle(Point& verificcation);
 	double get_x();
 	double get_y();
+	void dessin(char C,int rayon);
 		
 		
 	private:
@@ -77,7 +81,7 @@ class Cercle{
 
 
 	bool intersection_deux_cercles(Cercle C_1, Cercle C_2);
-	int randomNb ( int b );
+	double randomNb ( int b );
 	void normalisationGlobal(double& x3,double& y3);
 
 #endif

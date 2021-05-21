@@ -111,6 +111,20 @@ void Point::coordonnes_equivalentes (){
 	};  
 }
 
+void Point::dessin(char C,int rayon=0){
+	coordonnes_equivalentes();
+	
+	for(int i(0); i<10; i++){
+		
+		if (C =='P')dessin_robotP(get_equivalent(i,0),get_equivalent(i,1));		
+		if (C =='F')dessin_robotF(get_equivalent(i,0),get_equivalent(i,1));
+		if (C =='T')dessin_robotT(get_equivalent(i,0),get_equivalent(i,1));
+		if (C =='C')dessin_robotC(get_equivalent(i,0),get_equivalent(i,1));
+		if (C =='B')dessin_base(get_equivalent(i,0),get_equivalent(i,1));
+		if (C =='R')dessin_rangeC(get_equivalent(i,0),get_equivalent(i,1), rayon);
+		} 
+}
+
 void Point::set_coordonnes_equivalentes (  int i , int j , double& x) {
 	equivalent[i][j]=x;
 	std::cout << equivalent[i][j] << std::endl;
@@ -168,7 +182,12 @@ void Vecteur::norme_vecteur(Point A, Point B)
 	vecteur_y = y_equivalent_arrive - y_depart;
 }
 
-
+void Vecteur::dessin(){
+	dessin_liens(x_depart,y_depart,x_arrive,y_arrive);
+	
+	dessin_liens(	x_depart+2*dim_max,y_depart,
+					x_arrive+2*dim_max,y_arrive);
+}
 
 //Fonctions de la classe Cercle
 
@@ -208,6 +227,14 @@ double Cercle::get_x(){
 double Cercle::get_y(){
 	
 	return get_centre().get_y();}
+	
+void Cercle::dessin(char C,int rayon=0){
+	Point p = get_centre();	
+	p.coordonnes_equivalentes();
+	for(int i(0); i<10; i++){
+		if (C =='G')dessin_gisement(p.get_equivalent(i,0),p.get_equivalent(i,1), rayon);
+		} 
+}
 
 bool intersection_deux_cercles ( Cercle C1 , Cercle C2 )
 {
@@ -219,12 +246,11 @@ bool intersection_deux_cercles ( Cercle C1 , Cercle C2 )
 	return false; 
 }
 
-int randomNb ( int b )
+double randomNb ( int b )
 {
-  srand((unsigned) time(0));
-  int randomNumber;
-  randomNumber = (rand() % b) + 1;
-  return randomNumber;
+	double r = rand() ;
+	r = fmod ( r , b ) + 1 ; 
+	return r; 
 }
 
 void normalisationGlobal(double& x3, double& y3){

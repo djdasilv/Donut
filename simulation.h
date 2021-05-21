@@ -23,7 +23,7 @@ class Simulation{
 	Simulation();
 	~Simulation();
 	
-	bool simulation (); // genre ca ca sera probablement notre méthode "ultime qui vas faire un step"
+	void simulation (); // Methode 	qui fait un "step"
 
 	void lecture(char* nom);
 	void set_etat (	int& etat, double nbP, double nbF, double nbT, double nbC,double bases);
@@ -44,13 +44,19 @@ class Simulation{
 	Base* get_base(int i);
 	size_t gisement_size();
 	size_t base_size();	
-
-
+	
+	
+	void ajout_base ( Base* A );
+	void ajout_gisement ( Gisement* A);
 	void verification (Base* A);
 	void AffichageRobots ();
+	void set_erreur(int a);
+	bool get_erreur();
 
 
 	private:
+	int erreurs;
+	bool erreur;
 	vector < Gisement* > liste_gisement; 
 	vector < Base* > liste_base;
 	vector < Robot* > total_robots;										// ce vector est la pour assurer la conservation de l'information originelle des robots

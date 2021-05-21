@@ -3,7 +3,8 @@
 
 #include "base.h"
 #include "constantes.h"
-
+#include "message.h"
+#include <string>
 
 void Base :: trouver_max_uid ()
 {
@@ -76,6 +77,7 @@ Base :: Base ( double x , double y ,  double r , int  P, int F , int T , int C )
 	position.set_centre (x, y);
 	position.set_rayon(rayon_base);
 	set_ressources (r); 
+	compteur=0;
 	
 }
 
@@ -86,6 +88,11 @@ double Base::get_y() const{
 	return get_cercle().get_centre().get_y();
 }
 
+void Base::set_couleur(size_t i){
+	couleur = i+1;}
+
+int Base::get_couleur(){
+	return couleur;}
 
 double Base :: get_ressources () const
 {
@@ -104,7 +111,7 @@ Point Base::get_centre() const {
 
 //Verification que au moins un robot comm est present dans la base
 
-void Base :: robot_comm(vector <Base*> listeB) {
+int Base :: robot_comm(vector <Base*> listeB) {
 	
 	bool presence_robotC(false);
 	for (size_t i(0); i < robots_base.size(); i++)
@@ -122,10 +129,10 @@ void Base :: robot_comm(vector <Base*> listeB) {
 			}
 	}
 	if (presence_robotC == false) {
-		cout<<"message::missing_robot_communication(get_x(),get_y())";
-		exit(EXIT_FAILURE);
+		cout<<message::missing_robot_communication(get_x(),get_y())<<endl;
+		return 10;
 	}
-
+return 0;
 }
 
 //Fonction de ajout d'une base a la liste avec toutes les base
@@ -134,7 +141,7 @@ void Base :: robot_comm(vector <Base*> listeB) {
 
 
 //Addition d'un robot a une base et verification de UIDs differents
-void Base :: ajout_robot ( Robot* A)
+int  Base :: ajout_robot ( Robot* A)
 {
 
 	bool uid_egal (false);
@@ -144,11 +151,12 @@ void Base :: ajout_robot ( Robot* A)
 		}
 	}
 	if (uid_egal) {
-			cout<<"message::identical_robot_uid(A -> get_uid())";
-			exit(EXIT_FAILURE); 
+			cout<<message::identical_robot_uid(A -> get_uid());
+			return 1;
 	}
 	
 	robots_base.push_back( A );
+	return 0;
 }
 
 /**
@@ -167,12 +175,8 @@ max_uid = max_uid+1;
 return max_uid; 	
 }
 
-void Base :: Creation4G () // Cette fonction a pour but d'établir toutes les coordonnees nécessaires à occuper pour avoir un monde 
-{						   // sous le control total de la 4G l'idée initiale était de construire la 4G pendant la recherche de gisements mais 
-						   // mais pour des raisons de simplification d'algos nous nous sommes décidés à attendre la mise en place de la 4G 
-						   // avant de passer au mode recherche. Cependant nous avons conserver ces coordonnées pour avoir l'ordre de formation de la 4G ceci 
-						   // permet que au fur à mesure que la 4G se construit les robots communication restent connectés. ( les coordonnes forment des anneaux autour de la base)
-						   // la troisième collone de la matrice est un code binaire pour indiquer la présence d'un robot de communication ou pas
+void Base :: Creation4G ()
+{
 	Monde4G ={
 	position.get_x() + 0 * rayon_comm , position.get_y() + 0 * rayon_comm , 1 ,	//debut premier niveau
 	position.get_x() + 1 * rayon_comm , position.get_y() + 0 * rayon_comm , 0 ,
@@ -223,11 +227,10 @@ void Base :: Creation4G () // Cette fonction a pour but d'établir toutes les co
 	position.get_x() - 3 * rayon_comm , position.get_y() + 0 * rayon_comm , 0 ,
 	position.get_x() - 3 * rayon_comm , position.get_y() + 1 * rayon_comm , 0 ,
 	position.get_x() - 3 * rayon_comm , position.get_y() + 2 * rayon_comm , 0 ,
-	0 , 0 , 1 , // compteur de robots de la 4G qui ont été créé ( inutile retrospectivement ) 
+	0 , 0 , 1, 
 	};
 	
-	for ( size_t i(0); i < 49 ; i ++ ) // fonction très très importante, elle permet de normaliser les coordonnees 
-									   // que l'on vient de trouver grace au passage par référence de la fonction dans geomod
+	for ( size_t i(0); i < 49 ; i ++ ) 
 	{
 		normalisationGlobal( Monde4G[i][0] , Monde4G[i][1]); 
 	}
@@ -248,27 +251,95 @@ Base :: Base(const Base& other)
 		robots_base.push_back((*(other.robots_base[i])).copie());
 	}
 	vie = true;
+	
 }
 
-void Base :: maintenance () // en fait c'est rien d'autre que le compteurs des robots à zéro et prendre un coût pour cela. 
+string boolToString(bool a){
+	if(a == false) return "false";
+	else return "true";
+}
+
+void Base::saveBase1(ofstream& myfile){
+
+	myfile<<get_x() <<" "<<get_y()<<" "<<get_ressources()<<" "<<get_nbP()<<" ";
+	myfile<<get_nbF()<<" "<<get_nbT()<<" "<<get_nbC()<<"\n";
+		
+	for (int j(0); j <get_nb_robot(); j++ ){
+		if(get_robot(j)->get_type() == 'P'){
+			myfile<<get_robot(j)->get_uid()<<" ";
+			myfile<<get_robot(j)->get_compteur_de_distance ()<<" ";
+			myfile<<get_robot(j)->get_x()<<" "<<get_robot(j)->get_y()<<" ";
+			myfile<<get_robot(j)->get_But().get_x()<<" ";
+			myfile<<get_robot(j)->get_But().get_y()<<" ";
+			myfile<<boolToString(get_robot(j)->get_atteint())<<" ";
+			myfile<<boolToString(get_robot(j)->get_atteint())<<" ";
+			myfile<<boolToString(get_robot(j)->get_retour())<<" ";
+			myfile<<boolToString(get_robot(j)->P_get_found());
+			if (get_robot(j)->P_get_found()==true  ){
+				myfile<< "true"<<get_robot(j)->P_get_xg()<<" ";
+				myfile<< get_robot(j)->P_get_yg()<<" ";
+				myfile<<get_robot(j)->P_get_taille()<<" ";
+				myfile<<get_robot(j)->P_get_capacite()<< "\n";}
+			else {myfile <<"\n";}	
+		}	
+	}
+	saveBase2(myfile);
+}
+
+
+void Base::saveBase2(ofstream& myfile){
+	
+	for (int j(0); j <get_nb_robot(); j++ ){
+		if (get_robot(j)->get_type() == 'F'){
+			myfile<<get_robot(j)->get_uid()<<" ";
+			myfile<<get_robot(j)->get_compteur_de_distance ()<<" ";
+			myfile<<get_robot(j)->get_x()<<" "<<get_robot(j)->get_y()<<" ";
+			myfile<<get_robot(j)->get_But().get_x()<<" ";
+			myfile<<get_robot(j)->get_But().get_y()<<" ";
+			myfile<<boolToString(get_robot(j)->get_atteint())<<"\n";
+		}
+	}		
+	for (int j(0); j <get_nb_robot(); j++ ){
+		if (get_robot(j)->get_type() == 'T'){
+			myfile<<get_robot(j)->get_uid()<<" ";
+			myfile<<get_robot(j)->get_compteur_de_distance ()<<" ";
+			myfile<<get_robot(j)->get_x()<<" "<<get_robot(j)->get_y()<<" ";
+			myfile<<get_robot(j)->get_But().get_x()<<" ";
+			myfile<<get_robot(j)->get_But().get_y()<<" ";
+			myfile<<boolToString(get_robot(j)->get_atteint())<<" ";
+			myfile<<boolToString(get_robot(j)->get_retour())<<"\n";
+		}
+	}	
+	for (int j(0); j <get_nb_robot(); j++ ){
+		if (get_robot(j)->get_type() == 'C'){	
+			myfile<<get_robot(j)->get_uid()<<" ";
+			myfile<<get_robot(j)->get_compteur_de_distance ()<<" ";
+			myfile<<get_robot(j)->get_x()<<" "<<get_robot(j)->get_y()<<" ";
+			myfile<<get_robot(j)->get_But().get_x()<<" ";
+			myfile<<get_robot(j)->get_But().get_y()<<" ";
+			myfile<<boolToString(get_robot(j)->get_atteint())<<"\n";	
+		}
+	}		
+}
+
+void Base :: maintenance ()
 {
-	Vecteur V; // Vecteur initialisé pour le calcul de la distance
-	for ( size_t i (0) ; i < robots_base.size() ;  i++ ) // on vas prendre tous les robots de notre base car on veut éviter que
-														 // l'on se mette à faire la maintenance pour "l'ennemi" 
+	Vecteur V; 
+	for ( size_t i (0) ; i < robots_base.size() ;  i++ ) 
 	{
-		if ( robots_base[i] -> get_Connect() ){ 		// cette condition est inutile et n'est la que pour faire en sorte que l'on s'arrête dès
-														// le robot n'est pas à proximité, tout robot à qui on doit faire la maintenance devrait être connecté à la base 
-			V.norme_vecteur ( position.get_centre() , robots_base[i] -> get_centre() ); // on fait un vecteur entre les deux pour trouver la norme et regarder si il est bien superposé à la base 
-			if ( V.get_norme() == 0 ) 	// on check si il y a superposition 
-			{							// si c'est le cas :
-				if ( robots_base[i] -> get_compteur_de_distance() != 0) // pour savoir si il y besoins d'une maintenance sinon on crée les varibles suivantes pour rien mais c'est aussi inutile. 
+		if ( robots_base[i] -> get_Connect() )
+		{ 
+			V.norme_vecteur ( position.get_centre() , robots_base[i] -> get_centre() );
+			if ( V.get_norme() == 0)
+			{							
+				if ( robots_base[i] -> get_compteur_de_distance() != 0  ) 
 				{
-					double rep; // coût de réparation
-					rep = robots_base[i]-> get_compteur_de_distance() * cost_repair; // calculé 
-					double nv_qt = get_ressources() - rep ;	// on trouve la nouvelle qt de ressouces de la base 
-					set_ressources ( nv_qt ); // on la fixe 
+					double rep;
+					rep = robots_base[i]-> get_compteur_de_distance() * cost_repair; 
+					double nv_qt = get_ressources() - rep ;	
+					set_ressources ( nv_qt ); 
 					double null (0);	
-					robots_base[i]-> set_compteur_de_distance( null ) ; // mise à zéro du compteur de distance
+					robots_base[i]-> set_compteur_de_distance( null ) ; 
 				}
 			}
 		}	
@@ -342,24 +413,25 @@ void Base :: launch4G_3_supplemetaires () // faut que je la revoie;
 
 void Base :: launch4G_3_supplemetaires () // envoi au plus 3 nouveaux robots dans la 4G
 {
+	//cout<<"compteur:"<<compteur<<endl;
 	int i (0); 		// compteurs de robots lancés ( rappel au plus 3 )
-	int static j (0);		// vas compter les lignes de la matrice du Monde4G quer l'on vas parcourir
+	//int static compteur (0);		// vas compter les lignes de la matrice du Monde4G quer l'on vas parcourir
 					// on parcourir la le tableau des coordonnes jusuq'à trouver un couple de coordonnees qui n'est pas occupé par un robot de comm et si tel est le cas on s'emprèsse
 					// de lui en attribuer un	
 													
 		do {	
-			if ( Monde4G[j][2] == 0 )  // on regarde la condition qui est : est ce que il n'y a pas de robot attribué donc est ce que Monde[j][2] == 0 d'après le code bianire mis en place 
+			if ( Monde4G[compteur][2] == 0 )  // on regarde la condition qui est : est ce que il n'y a pas de robot attribué donc est ce que Monde[j][2] == 0 d'après le code bianire mis en place 
 			{
-				double x7 = Monde4G[j][0];		// si il y a besoins on vas chercher ses coordonnées
-				double y7 = Monde4G[j][1];
+				double x7 = Monde4G[compteur][0];		// si il y a besoins on vas chercher ses coordonnées
+				double y7 = Monde4G[compteur][1];
 				robots_base.push_back(new Communication ( get_set_nv_max_uid() , 0 , Monde4G[0][0] , Monde4G[0][1] , x7 , y7 , "false" )); // on initialise le nouveau robot de communication
 																																		// get_set_nv_max_uid donne la première plus grande udi disponible
 				i = i + 1;																												// on incrémente de un le compteur de robots 				
 //				Monde4G[j][2] = 1; 																										// on indique que la position de la 4G est prise
 				ressources = ressources - cost_com ; 																					// on fixe la nouvelle variation de ressources
 			}
-			j = j + 1; 																													// On incrémente la colonne à check
-	} while ( i < 3 and j < 49 ); 																										// les deux conditions qui déterminent de la continuité de la fonction
+			compteur+=1; 																													// On incrémente la colonne à check
+	} while ( i < 3 and compteur < 49 ); 																										// les deux conditions qui déterminent de la continuité de la fonction
 																																		// il faut bien mettre and parce que on ne peut que continuer 
 																																		// si les deux conditions sont respectées 
 	
@@ -372,6 +444,7 @@ void Base :: launch4G_3_supplemetaires () // envoi au plus 3 nouveaux robots dan
 
 bool Base :: decision_interet_gisement ( double x , double y , double r , double c )
 {
+	bool occupe = false ; 
 	Vecteur V; 
 	Point P ; 
 	P.set_coordonnes( x ,y ); 
@@ -379,7 +452,20 @@ bool Base :: decision_interet_gisement ( double x , double y , double r , double
 	double reste = fmod ( c , deltaR ); 
 	double passages = (c-reste)/deltaR; 
 	double cout_gisement = cost_forage + cost_transp + ( V.get_norme() - r ) * cost_repair * passages * 2 ;  
-	if ( c > cout_gisement) {
+	for ( size_t j (0) ; j < robots_base.size() ; j++ ) 
+	{
+		if ( robots_base[j] -> get_Connect() ) 
+		{
+			if ( robots_base[j] -> get_type() == 'T' or robots_base[j]-> get_type() == 'F' ) 
+			{
+				if ( robots_base[j] -> get_But().get_x() == x and robots_base[j] -> get_But().get_y() ) 
+				{
+					occupe = true; 
+				}
+			}
+		}
+	}
+	if ( c > cout_gisement and occupe == false) {
 	return true; 
 	}else {
 	return false; 
@@ -388,21 +474,21 @@ bool Base :: decision_interet_gisement ( double x , double y , double r , double
 
 
 void Base :: commande_gisement () {
-	for ( size_t i (0); i < robots_connect.size() ; i++) 
+	for ( size_t i (0); i < robots_base.size() ; i++) 
 	{
-		if ( robots_connect[i] -> get_type() == 'P' ) 
-		{
-			if ( robots_connect[i]-> P_get_found() == true )
+		if ( robots_base[i] -> get_type() == 'P' and robots_base[i] -> get_Connect() == true) 
+		{ 
+			if ( robots_base[i]-> P_get_found() == true )
 			{
-				if (decision_interet_gisement( robots_connect[i]-> P_get_xg() , robots_connect[i]-> P_get_yg() , robots_connect[i]-> P_get_taille() , robots_connect[i]-> P_get_capacite()) )
+				if (decision_interet_gisement( robots_base[i]-> P_get_xg() , robots_base[i]-> P_get_yg() , robots_base[i]-> P_get_taille() , robots_base[i]-> P_get_capacite()) )
 				{
-					robots_base.push_back( new Forage ( get_set_nv_max_uid() , 0 , get_x() ,  get_y() , robots_connect[i]-> P_get_xg() , robots_connect[i]-> P_get_yg() , "false" )); // il faut encore faire en sorte qu'elle s'arrete au moment ou on est au bord du gisement. 
+					robots_base.push_back( new Forage ( get_set_nv_max_uid() , 0 , get_x() ,  get_y() , robots_base[i]-> P_get_xg() , robots_base[i]-> P_get_yg() , "false" )); // il faut encore faire en sorte qu'elle s'arrete au moment ou on est au bord du gisement. 
 					ressources = ressources - cost_forage; 
-					robots_base.push_back( new Transport ( get_set_nv_max_uid() , 0 , get_x() ,  get_y() , robots_connect[i]-> P_get_xg() , robots_connect[i]-> P_get_yg() , "false" , "false" )); 
+					robots_base.push_back( new Transport ( get_set_nv_max_uid() , 0 , get_x() ,  get_y() , robots_base[i]-> P_get_xg() , robots_base[i]-> P_get_yg() , "false" , "false" )); 
 					ressources = ressources - cost_transp;
-					robots_connect[i] -> set_retour ( false) ;
-					robots_connect[i] -> P_set_found ( false ) ; 
-					robots_connect[i] -> set_but ( robots_connect[i] -> get_centre() );			
+					robots_base[i] -> set_retour ( false) ;
+					robots_base[i] -> P_set_found ( false ) ; 
+					//robots_base[i] -> set_but ( position.get_x() + 10. , position.get_y() + 10. );			
 				}
 			}
 		}
@@ -433,7 +519,6 @@ void Base :: MaJNbRobType () // appelée lors de l'étape de création d
 	nbP = 0;
 	nbC = 0;
 	nbT = 0;
-	cout << robots_base.size() << endl;
 	for( size_t i(0) ; i < robots_base.size() ; i++ ) // on parcourt tous les robots de la base et en fonction de son type on incrémente de 1 un certain nombre 
 	{
 
@@ -482,14 +567,18 @@ Point Base :: GisementPlusLoin ()
 	double d_g_max (0); 
 	for ( size_t i(0) ; i < robots_base.size() ; i++ )
 	{
-		if ( robots_base[i] -> get_type() == 'F' and robots_base[i] -> P_get_found() == true  ) // ici le P_get_found même si le nom est mal choisi renvoi l'état du gisement si il est plein ou pas
-																								// ceci permet de le choisir comme un potentiel gisement ou pas  
+		if ( robots_base[i] -> get_type() == 'F' and robots_base[i] -> P_get_found() == true and robots_base[i] -> get_Connect() == true and robots_base[i] -> get_jus()== true ) // ici le P_get_found même si le nom est mal choisi renvoi l'état du gisement si il est plein ou pas																					
 		{ 
-			if ( robots_base[i] -> get_Connect() )  {
-				V.norme_vecteur( position.get_centre() , robots_base[i]-> get_centre() ); 
-				if ( V.get_norme() >  d_g_max ) {
-					P.set_coordonnes ( robots_base[i]-> get_centre().get_x() , robots_base[i]-> get_centre().get_y() );
-					d_g_max = V.get_norme(); 
+			for ( size_t h (0) ; h < robots_base.size() ; h++ ) 
+			{
+				if ( robots_base[h]-> get_Connect() == true and robots_base[h]-> get_type() == 'T' and  robots_base[h]-> get_But().get_x() != robots_base[i]-> get_x() and robots_base[h]-> get_But().get_y() != robots_base[i]-> get_y() ) 				
+				{																			// une condition qui indique qu'il n'y a pas de robot de transport qui l'a déjà pris comme but
+					V.norme_vecteur( position.get_centre() , robots_base[i]-> get_centre() ); // distance entre la base et le gisement
+					if ( V.get_norme() >  d_g_max ) 
+					{
+						P.set_coordonnes ( robots_base[i]-> get_centre().get_x() , robots_base[i]-> get_centre().get_y() );
+						d_g_max = V.get_norme(); 
+					}
 				}
 			}
 		}
@@ -499,7 +588,6 @@ Point Base :: GisementPlusLoin ()
 
 void Base :: TabRemoteOrAutonomous(){
 	
-	cout << robots_base.size() << "nb de robots" << endl; 
 	robots_remote.clear();
 	robots_autonomous.clear();
 	for ( size_t i(0) ; i < robots_base.size() ; i++ )
@@ -518,39 +606,41 @@ void Base :: lancement_p()
 {
 	int i(0); 
 	do{
-		robots_base.push_back(new Prospecteur ( get_set_nv_max_uid() , 0 , position.get_x() , position.get_y() , position.get_x() + 10 , position.get_y() + 10 , "false" , "false" , "false" , 0 , 0 , 0 , 0 ));
-		nbP = nbP + 1; // dès que le robot a atteint son but il devrait partir au hasard quelque part 
+		double x7 = position.get_x() + 10. ; 
+		double y7 = position.get_y() + 10. ; 
+		robots_base.push_back(new Prospecteur ( get_set_nv_max_uid() , 0 , position.get_x() , position.get_y() , x7 ,y7 , "false" , "false" , "false" , 0 , 0 , 0 , 0 ));
+		nbP = nbP + 1; 
 		i = i + 3; 
 		ressources = ressources - cost_prosp ; 
-	} while ( i < 3 and nbP < 10) ;
+	} while ( i < 3 and nbP < 7) ;
 }
 
 
-void rec_DEF(Base* B ,  Robot* A ) 													// fonction récurente qui construit le tableau du graphe de la base
+
+
+
+
+void rec_DEF(Base* B ,  Robot* A ) 													
 {
 	for ( size_t i (0) ; i < B -> robots_base.size() ; i++ ) 
-	{
-		if ( B -> robots_base[i] -> get_uid() == A -> get_uid() ) 			// on trouve dans le tableau de la base le pointeur du robot traité et on le met à true 
 		{
-			B -> robots_base[i]-> set_Connect ( true ) ; 
-		}
-	}
-
-																					// si le robot A passe par cette fonction c'est qu'il est connecté à la base d'ou le besoins de mettre son connect à true 
-																				//robots_connect.push_back( A -> copie ()); 			// on ajoute ce robot au tableau avec tous les robots connectés 	
-	for ( size_t j(0) ; j < A -> robots_voisins.size() ; j++ ) 							
-	{
-		for ( size_t i (0) ; i < B -> robots_base.size() ; i++ ) 
+			if ( B -> robots_base[i] -> get_uid() == A -> get_uid() ) 			
 			{
-				if ( B -> robots_base[i] -> get_uid() == A ->robots_voisins[j] ->get_uid() and B-> robots_base[i] -> get_Connect() == false) 									// on trouve le robot voisin dans le tableau des robots de base 
-	
-					{																																											//if( A-> robots_voisins[j] -> get_Connect() == false )		 							// ici on vérifie que le robot n'a pas déjà été visité et n'a donc pas été inclus.
-																																		//{
-					cout << "uid du robot connecté" << B -> robots_base[i]-> get_uid() << endl;  
-					rec_DEF( B , B-> robots_base[i] ); // appel à la fonction récurente pour ce robot
-					}
-			}		
-				
+				B -> robots_base[i]-> set_Connect ( true ) ; 
+			}
+		}
+
+ 
+for ( size_t j(0) ; j < A -> robots_voisins.size() ; j++ )
+	{
+		for ( size_t i (0) ; i < B -> robots_base.size() ; i++ )  							
+			{
+				if ( B -> robots_base[i] -> get_uid() == A ->robots_voisins[j] ->get_uid() and B-> robots_base[i] -> get_Connect() == false) 									 
+						{																																									
+//cout << "uid du robot connecté est "  << B -> robots_base[i]-> get_uid() << endl;  
+						rec_DEF( B , B-> robots_base[i] ); 
+						}
+			}				
 	}
 }
 

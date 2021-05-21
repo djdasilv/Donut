@@ -129,8 +129,7 @@ void draw_gisements(int height , int width);
 void draw_link(int height,int width,int base);
 void set_simulation(Simulation* simulation);
 
-void saveGisement(char* filename);
-void saveBase(char* filename,ofstream& myfile);
+void save(char* filename);
 
 string boolToString(bool a);
 

@@ -64,7 +64,7 @@ Windowx::Windowx()
 
 	m_box_Top.add(m_Frame_Horizontal);
 	//Ce frame contient la surface de dessin 
-	//set_default_size(dim_max, dim_max);
+	set_default_size(dim_max, dim_max);
 	m_Frame_Horizontal.add(Area);
     m_Frame_Horizontal.set_hexpand(true); 
    
@@ -110,20 +110,22 @@ bool Windowx::on_idle()			// méthode de gtkm qui est apellé tout le temps
   
   
 
-  if(started)
+  if(started and not (sim==nullptr))
   {	++count3;
 	cout << "Mise à jour de la simulation numéro : " << ++count << endl;
 	sim->simulation();
-	std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	std::this_thread::sleep_for(std::chrono::milliseconds(30));
   }
-  else if (step)
+  else if (step and not(sim == nullptr))
   {
 	step = false;
 	sim->simulation();
 	cout << "Mise à jour de la simulation numéro : " << ++count << endl;
   }
-   Area.refresh();		// mise à jour 
+  if(not (sim==nullptr)){
+  Area.refresh();		// mise à jour 
   scroll.tree_view_update();
+}
 
   return true;  // return false when done
 }
@@ -233,7 +235,8 @@ void ButtonBox::on_button_clicked_Exit(){
 }
 
 void ButtonBox::on_button_clicked_Open(){
-	
+	started=false;
+	m_Button_Start.set_label("Start");
 	Gtk::FileChooserDialog dialog(	"Please choose a file",
 									Gtk::FILE_CHOOSER_ACTION_OPEN);
 //	dialog.set_transient_for( new Gtk::ButtonBox(Gtk::ORIENTATION_VERTICAL));
@@ -260,7 +263,11 @@ void ButtonBox::on_button_clicked_Open(){
 			delete sim;
 			cout << "File selected: " <<  line << endl;
 			sim=new Simulation();
-			sim->lecture(filename);	 	
+			sim->lecture(filename);	
+			if (sim->get_erreur()) {
+				//draw_white();}
+			}
+			//} else {cout <<" Don't Delete this bullshit " << endl;}
 			break;
 		}
 		case(Gtk::RESPONSE_CANCEL):{
@@ -275,6 +282,8 @@ void ButtonBox::on_button_clicked_Open(){
 }
 
 void ButtonBox::on_button_clicked_Save(){
+	started=false;
+	m_Button_Start.set_label("Start");
 	
 	Gtk::FileChooserDialog dialog(	"Please choose a file",
 									Gtk::FILE_CHOOSER_ACTION_SAVE);
@@ -300,7 +309,7 @@ void ButtonBox::on_button_clicked_Save(){
 			for (size_t i=0; i< line.length(); i++) argv[i]= line[i];
 			
 			argv[line.length()]= '\0';
-			saveGisement(filename);
+			save(filename);
 
 			break;
 		}
@@ -414,106 +423,58 @@ void set_simulation(Simulation* simulation){
 	sim = simulation ;
 }
 
-void saveGisement(char* filename){
+void save(char* filename){
 	ofstream myfile;
 	myfile.open (filename);
 	if (sim->gisement_size()>0) myfile<<sim->gisement_size()<<"\n";
+	//Save Gisements
 	for (size_t i(0); i< sim->gisement_size(); i++){
 		myfile<<sim->get_gisement(i)->get_x()<< " ";
 		myfile<<sim->get_gisement(i)->get_y()<<" ";
 		myfile<<sim->get_gisement(i)->get_rayon()<<" ";
 		myfile<< sim->get_gisement(i)->get_qt_resources()<<"\n";}
+	
+	//Save Bases
 	if (sim->base_size()>0) myfile<<sim->base_size()<<"\n";
-	saveBase(filename,myfile);
-}
-
-
-
-void saveBase(char* filename, ofstream& myfile ){
 	for (size_t i(0); i< sim->base_size() ; i++){
-		myfile<<sim->get_base(i)->get_x() <<" "<<sim->get_base(i)->get_y()<<" ";
-		myfile<<sim->get_base(i)->get_ressources()<<" "; 
-		myfile<<sim->get_base(i)->get_nbP()<<" ";
-		myfile<<sim->get_base(i)->get_nbF()<<" ";
-		myfile<<sim->get_base(i)->get_nbT()<<" ";
-		myfile<<sim->get_base(i)->get_nbC()<<"\n";
-		
-		for (int j(0); j <sim->get_base(i)->get_nb_robot(); j++ ){
-			myfile<<sim->get_base(i)->get_robot(j)->get_uid()<<" ";
-			myfile<<sim->get_base(i)->get_robot(j)->get_compteur_de_distance ()<<" ";
-			myfile<<sim->get_base(i)->get_robot(j)->get_x()<<" ";
-			myfile<<sim->get_base(i)->get_robot(j)->get_y()<<" ";
-			myfile<<sim->get_base(i)->get_robot(j)->get_But().get_x()<<" ";
-			myfile<<sim->get_base(i)->get_robot(j)->get_But().get_y()<<" ";
-			myfile<<boolToString(sim->get_base(i)->get_robot(j)->get_atteint())<<" ";
-			
-			if(sim->get_base(i)->get_robot(j)->get_type() == 'P' ){
-				
-				myfile<<boolToString(sim->get_base(i)-> get_robot(j)->get_retour());
-				myfile<<" ";
-				myfile<<boolToString(sim->get_base(i)-> get_robot(j)->P_get_found());
-				
-				if (sim->get_base(i)-> get_robot(j)->P_get_found()==true  ){
-					myfile<< "true"<<sim->get_base(i)->get_robot(j)->P_get_xg()<<" ";
-					myfile<<sim->get_base(i)-> get_robot(j)->P_get_yg()<<" ";
-					myfile<<sim->get_base(i)-> get_robot(j)->P_get_taille()<<" ";
-					myfile<<sim->get_base(i)-> get_robot(j)->P_get_capacite()<< "\n";}
-				
-				else {myfile <<"\n";}
-			
-			} else if (sim->get_base(i)->get_robot(j)->get_type() == 'T'){
-				
-				myfile<<boolToString(sim->get_base(i)->get_robot(j)->get_retour());
-				myfile<<"\n";
-			
-			} else if (	(sim->get_base(i)->get_robot(j)->get_type() == 'C') or 
-						(sim->get_base(i)->get_robot(j)->get_type() == 'F')){
-				myfile<<"\n";}
-			}		
-		}	
+			sim->get_base(i)->saveBase1(myfile);
+		}
 	myfile.close();
-}
-
-string boolToString(bool a){
-	if(a == false) return "false";
-	else return "true";
 }
 
 void draw_bases(int height, int width){
 	for (size_t i(0); i<sim->base_size(); i++){ 
+		set_couleur_base(sim->get_base(i)->get_couleur());
+		sim->get_base(i)->get_cercle().get_centre().dessin('B', 10*rayon_base);
 		
-		sim->get_base(i)->get_centre().normalisation(sim->get_base(i)->get_centre());
-		
-		dessin_point(sim->get_base(i)->get_x(),sim->get_base(i)->get_y());
-		set_couleur_base(i+1);
-		dessin_base(height,width,sim->get_base(i)->get_x(),sim->get_base(i)->get_y(),
-						10*rayon_base);
 		//Dessine les robots
 		for(int j(0);j <sim-> get_base(i)->get_nb_robot(); j++){
-			dessin_point(sim->get_base(i)->get_robot(j)->get_x(),sim->get_base(i)->get_robot(j)->get_y());
-			int rayon_robot(300);
-			if (range and sim->get_base(i)->get_robot(j)->get_type() =='C' ){
-				dessin_robotC(height,width,sim->get_base(i)->get_robot(j)->get_x(),sim->get_base(i)->get_robot(j)->get_y(),rayon_robot);
+			char C = sim->get_base(i)->get_robot(j)->get_type();
+			sim->get_base(i)->get_robot(j)->get_centre().dessin(C, rayon_comm);
+			set_couleur_base(sim->get_base(i)->get_couleur());
+			if (range){
+				sim->get_base(i)->get_robot(j)->get_centre().dessin('R', rayon_comm);}
+				set_couleur_base(sim->get_base(i)->get_couleur());
+			for(int k(0); k < sim-> get_base(i)->get_robot(j)->voisin_size();k++){
+				Vecteur V;
+				V.norme_vecteur(sim->get_base(i)->get_robot(j)->get_centre(),
+							sim->get_base(i)->get_robot(j)->get_voisin(k)->get_centre());
+				
+				if (link2) {
+					V.dessin();
+					set_couleur_base(sim->get_base(i)->get_couleur());
+				}
 			}
 		}
-
 	}
-	
 }
+	
+
 void draw_gisements(int height, int width){
 	//Desssine les gisements
 	for (size_t i(0); i<sim->gisement_size(); i++){
 
-		sim->get_gisement(i)->getCercleG().get_centre().normalisation( sim->get_gisement(i)->
-																getCercleG().
-																get_centre());
-		dessin_gisement(height,width,sim->get_gisement(i)->get_x(), 
-						sim->get_gisement(i)->get_y(), sim->get_gisement(i)->get_rayon());
+		sim->get_gisement(i)->getCercleG().dessin('G', sim->get_gisement(i)->get_rayon());
 	}
-}
-
-void draw_link(int height, int width,int base){
-	for(int i(0); i<sim->base_size() ; i++){}// Completer boucle pour parcourir tou les robots qui sont connectés
-	//dessin_liens();
 }
 
