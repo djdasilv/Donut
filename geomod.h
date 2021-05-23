@@ -71,7 +71,7 @@ class Cercle{
 	bool appartient_cercle(Point& verificcation);
 	double get_x();
 	double get_y();
-	void dessin(char C,int rayon);
+	void dessin(char C,int rayon,double ressource);
 		
 		
 	private:

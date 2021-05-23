@@ -29,9 +29,9 @@ namespace Gtk
 
 namespace {
 	//size_t count2(4);
-	int DEFAULT_SIZE = 800;
+	int DEFAULT_SIZE(800);
 	int count3(0);
-	Simulation* sim(nullptr);			// pointeur sur simulation initialisé par gui.cc
+	shared_ptr<Simulation> sim(nullptr);	
 	bool link2(true), range (true),started(false),step(false);
 }
 
@@ -43,8 +43,8 @@ Windowx::Windowx()
 	m_box_Top(Gtk::ORIENTATION_HORIZONTAL,5),
 	m_box_Button(Gtk::ORIENTATION_VERTICAL,5)
 {
-	set_title("Planet Donut");			// met le titre 
-	add(m_box);							// ajoute la box
+	set_title("Planet Donut");			
+	add(m_box);							
 	m_box.set_border_width(5);
 	m_box.add(m_box_Top);
 	m_box.add(m_box_Bottom);
@@ -52,11 +52,9 @@ Windowx::Windowx()
 	m_box_Button.add(m_box_General);
 	m_box_Button.add(m_box_Display);
 	m_box_Bottom.add(scroll);
-	//Area.set_size_request(taille_dessin, taille_dessin);		// demande la taille minimale
-	//set_transient_for(*this);
 	
 	//Ajoute les boutons de General et Toggle Display dans un box
-	m_box_General.pack_start(	*Gtk::manage( new ButtonBox(false, "General", 5,			// initialisateurs pour box
+	m_box_General.pack_start(	*Gtk::manage( new ButtonBox(false, "General", 5,		
 			Gtk::BUTTONBOX_SPREAD)), Gtk::PACK_EXPAND_WIDGET);
 			
 	m_box_Display.pack_start(*Gtk::manage( new ButtonBox2(false, "Toggle Display", 5,
@@ -108,13 +106,11 @@ bool Windowx::on_idle()			// méthode de gtkm qui est apellé tout le temps
 {
   static unsigned count(0);
   
-  
-
   if(started and not (sim==nullptr))
   {	++count3;
 	cout << "Mise à jour de la simulation numéro : " << ++count << endl;
 	sim->simulation();
-	std::this_thread::sleep_for(std::chrono::milliseconds(30));
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
   else if (step and not(sim == nullptr))
   {
@@ -166,16 +162,11 @@ Scroll::Scroll()
 
 Scroll::~Scroll(){}
 
-
-// the declaration below should not exist in your gui module; instead you should have a
-// local vector declared in the method tree_view_update() and such a vector such be
-// updated with the value returned by a call to your simulation module.
-
 void Scroll::tree_view_update()
 {
   Glib::RefPtr<Gtk::ListStore> ref_tree_model = Gtk::ListStore::create(_columns);
   _tree_view.set_model(ref_tree_model);
-  if(!(sim == nullptr)) // here there should be a test about the existence of a simulation
+  if(not(sim == nullptr)) 
   {
 	for(size_t i = 0 ; i <sim->base_size() ; i++)
 	{
@@ -214,11 +205,16 @@ ButtonBox::ButtonBox(	bool horizontal, const Glib::ustring& title,
 	set_halign(Gtk::ALIGN_FILL);
 	 
 	add(*bbox);
-	m_Button_Exit.signal_clicked().connect(sigc::mem_fun(*this, &ButtonBox::on_button_clicked_Exit) );
-	m_Button_Open.signal_clicked().connect(sigc::mem_fun(*this, &ButtonBox::on_button_clicked_Open) );
-	m_Button_Save.signal_clicked().connect(sigc::mem_fun(*this, &ButtonBox::on_button_clicked_Save) );
-	m_Button_Start.signal_clicked().connect(sigc::mem_fun(*this, &ButtonBox::on_button_clicked_Start) );
-	m_Button_Step.signal_clicked().connect(sigc::mem_fun(*this, &ButtonBox::on_button_clicked_Step) );
+	m_Button_Exit.signal_clicked().connect(	sigc::mem_fun(*this, 
+											&ButtonBox::on_button_clicked_Exit) );
+	m_Button_Open.signal_clicked().connect(	sigc::mem_fun(*this, 
+											&ButtonBox::on_button_clicked_Open) );
+	m_Button_Save.signal_clicked().connect(	sigc::mem_fun(*this, 
+											&ButtonBox::on_button_clicked_Save) );
+	m_Button_Start.signal_clicked().connect(sigc::mem_fun(*this, 
+											&ButtonBox::on_button_clicked_Start) );
+	m_Button_Step.signal_clicked().connect(	sigc::mem_fun(*this, 
+											&ButtonBox::on_button_clicked_Step) );
 
 	/* Set the appearance of the Button Box */
 	bbox->set_layout(layout);
@@ -237,9 +233,12 @@ void ButtonBox::on_button_clicked_Exit(){
 void ButtonBox::on_button_clicked_Open(){
 	started=false;
 	m_Button_Start.set_label("Start");
+	
 	Gtk::FileChooserDialog dialog(	"Please choose a file",
 									Gtk::FILE_CHOOSER_ACTION_OPEN);
-//	dialog.set_transient_for( new Gtk::ButtonBox(Gtk::ORIENTATION_VERTICAL));
+	
+	auto *win = dynamic_cast<Gtk::Window *>(this->get_toplevel());
+	dialog.set_transient_for( *win);
 	//Add response buttons the the dialog:
 	dialog.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
 	dialog.add_button("_Open", Gtk::RESPONSE_OK);
@@ -260,9 +259,8 @@ void ButtonBox::on_button_clicked_Open(){
 			char* filename = argv;
 			for (size_t i=0; i< line.length(); i++) argv[i]= line[i];
 			argv[line.length()]= '\0';
-			delete sim;
 			cout << "File selected: " <<  line << endl;
-			sim=new Simulation();
+			sim=shared_ptr<Simulation>(new Simulation());
 			sim->lecture(filename);	
 			if (sim->get_erreur()) {
 				//draw_white();}
@@ -287,7 +285,8 @@ void ButtonBox::on_button_clicked_Save(){
 	
 	Gtk::FileChooserDialog dialog(	"Please choose a file",
 									Gtk::FILE_CHOOSER_ACTION_SAVE);
-						
+	auto *win = dynamic_cast<Gtk::Window *>(this->get_toplevel());
+	dialog.set_transient_for( *win);					
 	//Add response buttons the the dialog:
 	dialog.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
 	dialog.add_button("_Save", Gtk::RESPONSE_OK);
@@ -348,8 +347,11 @@ ButtonBox2::ButtonBox2(	bool horizontal, const Glib::ustring& title,
 
 	add(*bbox2);
 	this->set_valign(Gtk::ALIGN_FILL);
-	m_Button_Link.signal_clicked().connect(sigc::mem_fun(*this, &ButtonBox2::on_button_clicked_Link) );
-	m_Button_Range.signal_clicked().connect(sigc::mem_fun(*this, &ButtonBox2::on_button_clicked_Range) );
+	m_Button_Link.signal_clicked().connect(	sigc::mem_fun(*this, 
+											&ButtonBox2::on_button_clicked_Link) );
+											
+	m_Button_Range.signal_clicked().connect(sigc::mem_fun(*this, 
+											&ButtonBox2::on_button_clicked_Range) );
 
 	/* Set the appearance of the Button Box */
 	bbox2->set_layout(Gtk::BUTTONBOX_EXPAND);
@@ -392,7 +394,8 @@ bool MyArea::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 }
 
 //Convertion du systeme d'axe de DrawingArea vers celle de Planet Donut
-void MyArea::orthographic_projection(const Cairo::RefPtr<Cairo::Context>& cr, double width, double height)
+void MyArea::orthographic_projection(	const Cairo::RefPtr<Cairo::Context>& cr,
+										double width, double height)
 {
 	double xMax(dim_max),xMin(-dim_max),yMax(dim_max),yMin(-dim_max);
 	
@@ -419,7 +422,7 @@ void MyArea::refresh()
   }
 }
 
-void set_simulation(Simulation* simulation){
+void set_simulation(shared_ptr<Simulation> simulation){
 	sim = simulation ;
 }
 
@@ -453,12 +456,14 @@ void draw_bases(int height, int width){
 			sim->get_base(i)->get_robot(j)->get_centre().dessin(C, rayon_comm);
 			set_couleur_base(sim->get_base(i)->get_couleur());
 			if (range){
-				sim->get_base(i)->get_robot(j)->get_centre().dessin('R', rayon_comm);}
+				sim->get_base(i)->get_robot(j)->get_centre().dessin('R', rayon_comm);
+				}
 				set_couleur_base(sim->get_base(i)->get_couleur());
 			for(int k(0); k < sim-> get_base(i)->get_robot(j)->voisin_size();k++){
 				Vecteur V;
 				V.norme_vecteur(sim->get_base(i)->get_robot(j)->get_centre(),
-							sim->get_base(i)->get_robot(j)->get_voisin(k)->get_centre());
+								sim->get_base(i)->get_robot(j)->get_voisin(k)
+								->get_centre());
 				
 				if (link2) {
 					V.dessin();
@@ -473,8 +478,9 @@ void draw_bases(int height, int width){
 void draw_gisements(int height, int width){
 	//Desssine les gisements
 	for (size_t i(0); i<sim->gisement_size(); i++){
-
-		sim->get_gisement(i)->getCercleG().dessin('G', sim->get_gisement(i)->get_rayon());
+		double vie = sim->get_gisement(i)->get_vie();
+		sim->get_gisement(i)->getCercleG().dessin(	'G', sim->get_gisement(i)->
+													get_rayon(),vie);
 	}
 }
 

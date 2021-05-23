@@ -23,8 +23,8 @@ Simulation::Simulation(){
 Simulation::~Simulation(){
 	for (size_t i = 0; i < liste_base.size(); i++)
 	{
-		effacer(liste_base[i]);
-		delete liste_gisement[i];
+		//effacer(liste_base[i]);
+		//delete liste_gisement[i];
 	}
 }
 
@@ -112,7 +112,7 @@ void Simulation::decodage_ligne1(string line){
 			data>>x>>y>>rayon>>ressource;
 			//cout << x <<" "<< y <<endl;
 			if (g<nombre) g++;
-			ajout_gisement(new Gisement (x,y,rayon, ressource));
+			ajout_gisement(shared_ptr<Gisement>( new Gisement(x,y,rayon, ressource)));
 			if (g==nombre) etat1=DEF;
 			break;
 			
@@ -143,7 +143,7 @@ void Simulation::decodage_ligne2(string line){
 			if (base2 <=nombre){
 				data>>x>>y>>ressource>>nbP>>nbF>>nbT>>nbC;
 			//	cout << x << " "<< y<< " "<< ressource<< " "<<nbP<<" "<<nbF<<" "<<nbT<<" "<< nbC<<endl; 
-				ajout_base( new Base (x,y,ressource,nbP,nbF, nbT,nbC));
+				ajout_base(shared_ptr<Base>( new Base (x,y,ressource,nbP,nbF, nbT,nbC)));
 				if (nbC == 0) {
 					cout<<message::missing_robot_communication(	liste_base[base2] -> get_x(),
 																liste_base[base2] -> get_y());
@@ -161,13 +161,13 @@ void Simulation::decodage_ligne2(string line){
 			
 			//cout<<uid<<" "<<dp<<"  "<<x<<" "<<y<<"  "<<xb<<"  "<<yb<< " " << atteint <<endl;
 			if (found =="false") { 
-				liste_base[base2-1] -> ajout_robot(new Prospecteur(uid,dp,x,y,xb,yb,
-															atteint,retour, found));}		
+				liste_base[base2-1] -> ajout_robot(shared_ptr<Prospecteur>(new Prospecteur(uid,dp,x,y,xb,yb,
+															atteint,retour, found)));}		
 			else { 
 				data>>xg>>yg>>rayong>>capaciteg;
-				liste_base[base2-1] -> ajout_robot(new Prospecteur(uid,dp,x,y,xb,yb,atteint,
+				liste_base[base2-1] -> ajout_robot(shared_ptr<Prospecteur>(new Prospecteur(uid,dp,x,y,xb,yb,atteint,
 															retour,found,xg,yg,rayong,
-															capaciteg));}
+															capaciteg)));}
 			if (nb_robots+1==nbP) {
 				set_etat(etat2, nbP, nbF, nbT, nbC,base2);			
 				nb_robots=0;
@@ -178,7 +178,7 @@ void Simulation::decodage_ligne2(string line){
 		case ROBOTF:
 			data>>uid>>dp>>x>>y>>xb>>yb>>atteint;
 			//cout<<uid<<" "<<dp<<"  "<<x<<" "<<y<<"  "<<xb<<"  "<<yb<< " " << atteint << endl;
-			liste_base[base2-1] -> ajout_robot(new Forage(uid, dp,x,y,xb,yb,atteint));
+			liste_base[base2-1] -> ajout_robot(shared_ptr<Forage>(new Forage(uid, dp,x,y,xb,yb,atteint)));
 			if (nb_robots+1==nbF) {
 				nb_robots=0;
 				set_etat(etat2, nbP, nbF, nbT, nbC,base2);
@@ -189,7 +189,7 @@ void Simulation::decodage_ligne2(string line){
 		case ROBOTT:
 			data>>uid>>dp>>x>>y>>xb>>yb>>atteint>>retour;
 		//	cout<<uid<<" "<<dp<<"  "<<x<<" "<<y<<"  "<<xb<<"  "<<yb<< " " << atteint <<endl;
-			liste_base[base2-1] -> ajout_robot(new Transport(uid,dp,x,y,xb,yb,atteint,retour));
+			liste_base[base2-1] -> ajout_robot(shared_ptr<Transport>(new Transport(uid,dp,x,y,xb,yb,atteint,retour)));
 			if (nb_robots+1==nbT) {
 				nb_robots=0;
 				set_etat(etat2, nbP, nbF, nbT, nbC,base2);			
@@ -200,7 +200,7 @@ void Simulation::decodage_ligne2(string line){
 		case ROBOTC:
 			data>>uid>>dp>>x>>y>>xb>>yb>>atteint;
 			cout<<uid<<" "<<dp<<"  "<<x<<" "<<y<<" "<<xb<<"  "<<yb<<" " << atteint <<endl;
-			liste_base[base2-1] -> ajout_robot(new Communication(uid,dp,x,y,xb,yb,atteint));
+			liste_base[base2-1] -> ajout_robot(shared_ptr<Communication>(new Communication(uid,dp,x,y,xb,yb,atteint)));
 			if (nb_robots+1==nbC) {
 				set_etat(etat2, nbP, nbF, nbT, nbC,base2);
 				nb_robots=0;			
@@ -211,7 +211,7 @@ void Simulation::decodage_ligne2(string line){
 	
 }
 
-void Simulation::ajout_gisement ( Gisement* A) 
+void Simulation::ajout_gisement ( shared_ptr<Gisement> A) 
 {
 	bool presence (false);
 	int tmp(0);
@@ -233,6 +233,21 @@ void Simulation::ajout_gisement ( Gisement* A)
 	} 
 	
 };
+void Simulation::MajBase(){
+	for(size_t i(0);i< liste_base.size(); i++){
+		if ((liste_base[i]->get_ressources() <= 0 ) or (liste_base[i]->get_ressources()< 200 and liste_base[i]->get_nbF()==0 and liste_base[i]->get_nbT()==0)){
+			liste_base[i]->set_vie(false);
+		}
+	}
+	vector <shared_ptr<Base>> liste;
+	for (size_t i(0) ; i < liste_base.size(); i++){
+		if (liste_base[i]->get_vie()){
+			liste.push_back(liste_base[i]);
+		}
+	}
+	liste_base = liste;
+}
+
 void Simulation::set_erreur(int a){
 	erreur=erreur+a;
 }
@@ -247,11 +262,11 @@ void effacer(){
 		count=0;
 }**/
 
-Gisement* Simulation::get_gisement(int i){
+shared_ptr<Gisement> Simulation::get_gisement(int i){
 	return liste_gisement[i];
 }
 
-Base* Simulation::get_base(int i){
+shared_ptr<Base> Simulation::get_base(int i){
 	return liste_base[i];
 }
 
@@ -263,7 +278,7 @@ size_t Simulation::base_size(){
 	return liste_base.size();
 }
 
-void Simulation :: TabRobotsConnectBases( Base* A )
+void Simulation :: TabRobotsConnectBases( shared_ptr<Base> A )
 {
 
 	for ( size_t l(0) ; l < A->robots_base.size() ; l++ ) 
@@ -288,17 +303,16 @@ for ( size_t i(0) ; i < liste_base.size() ; i++ )
 	{
 		for (size_t j( 0) ; j < liste_base[i] -> robots_base.size() ; j++ ) 
 		{ 
-		total_robots.push_back( liste_base[i] -> robots_base[j] );  
+		//total_robots.push_back( liste_base[i] -> robots_base[j] );  
 		}
 	}
 }
 
-void Simulation :: creation (Base* A) 																				
+void Simulation :: creation (shared_ptr<Base> A) 																				
 {
 
 
-for ( size_t i(0); i < A -> robots_base.size() ; i++ )																		 
-	{
+	for ( size_t i(0); i < A -> robots_base.size() ; i++ ){																		 
 			A -> robots_base[i] -> set_base (  A-> get_x() , A -> get_y() );  
 	}
 	
@@ -308,15 +322,16 @@ for ( size_t i(0); i < A -> robots_base.size() ; i++ )
 	A -> FindActive4G();																				
 	
 	
-	if ( (A -> get_4G() == false and A -> get_ressources() > 350) /* or ( A-> get_ressources() > 20. and A->get_nbF() != 0 and A-> get_nbT() != 0  and A -> get_4G() == false)*/ ) 																	
-	{										
+	if ((A->get_4G()==false and A->get_ressources()>300. and A->get_4G()==false)  or 
+		(A->get_ressources()>60. and A->get_nbF()== 1 and A-> get_nbT() == 1  
+		and A -> get_4G() == false)){										
 		A -> launch4G_3_supplemetaires(); 																
 	}
-	else if ( ( A -> get_nbP() < 3 and A -> get_ressources() > 300.) /*or (A-> get_nbP() == 0 )*/)
-	{	
+	else if ((	A->get_nbP()<4 and A->get_ressources()>300.) or (A->get_nbP()<4 and 
+				A->get_ressources()>30 and A->get_nbF() == 1 and A->get_nbT() ==1 )){  	
 		A -> lancement_p(); 			 																	
 	}
-	else if ( A -> get_ressources() > 210. )
+	else if ( A -> get_ressources() > 210)
 	{					
 		A-> commande_gisement();
 	}	
@@ -326,41 +341,38 @@ for ( size_t i(0); i < A -> robots_base.size() ; i++ )
 
 void Simulation :: VideTabTotalConnectFalse ()
 {
-for ( size_t i(0)  ; i < total_robots.size() ; i ++ ) 
+	for ( size_t i(0)  ; i < total_robots.size() ; i ++ ) 
 	{
 		total_robots[i] -> set_Connect(false); 
 	}
 }
 
 
-void Simulation :: maintenance_bases ( Base* A )
+void Simulation :: maintenance_bases ( shared_ptr<Base> A )
 {
 	 A -> maintenance (); 																				// il s'agit d'une fonction void d'ou le besoins de cette fonction de passage dans simulation
 }
 
 
-void Simulation :: update_autonomous ( Base* A )														 // on vas agir sur tous les robots d'une certaine base qui ne sont pas connectés 
-{
-		for ( size_t j(0) ; j < A -> robots_base.size() ; j++ )										// parcourir tout le tableau des robots qui ne sont pas connectés
-		{
-										// agirons sinon ils ignorerons cet argument
-			
-				if ( A-> robots_base[j] -> get_Connect() == false ) 
-				{
-					A -> robots_base[j] -> mode_autonome ( A -> robots_base , liste_gisement );
-				}											 					// le mode autonome est une méthode virtuelle avec une définition propre à chaque robot.
-						
-		}	
-}
-
-void Simulation :: update_remote ( Base* A )
+void Simulation :: update_autonomous ( shared_ptr<Base> A )														 // on vas agir sur tous les robots d'une certaine base qui ne sont pas connectés 
 {
 	for ( size_t j(0) ; j < A -> robots_base.size() ; j++ )										// parcourir tout le tableau des robots qui ne sont pas connectés
+	{
+		if ( A-> robots_base[j] -> get_Connect() == false ) 
+			{
+			A->robots_base[j]->mode_autonome(A->robots_base,liste_gisement);
+		}											 								
+	}	
+}
+
+void Simulation :: update_remote ( shared_ptr<Base> A )
+{
+	for ( size_t j(0) ; j < A -> robots_base.size() ; j++ )										
 		{
 				if ( A-> robots_base[j] -> get_Connect() == true ) 
 				{
-					A -> robots_base[j] -> mode_remote ( A -> robots_base , liste_gisement );
-				}											 					// le mode autonome est une méthode virtuelle avec une définition propre à chaque robot.
+					A->robots_base[j]->mode_remote(A->robots_base,liste_gisement );
+				}											 					
 				
 		}	
 	
@@ -369,65 +381,62 @@ void Simulation :: update_remote ( Base* A )
 }
 
 
-void update_voisins ( Base* A , Base* B ) 																	// fonction responsable de la creation du tableau des 
+void update_voisins ( shared_ptr<Base> A ) 																	
 { 
-	Vecteur V; 																								// vecteur pour calculer la norme entre les robots
-	for ( size_t i (0) ; i < A -> robots_base.size() ; ++i ) 												// pour tous les robots de la Base à qui l'on souhaite établir le tableau des robots voisins aux voisins. 
-		{
-			A -> robots_base[i] -> robots_voisins.clear();													// Même si cela peut se montrer inutile dans certaines situations on vide le tableau avec tous les robots
-																											// voisins histoire d'être bien sur que on n'en gagne pas un de trop 
-														
-			for ( size_t j (0) ; j < B -> robots_base.size() ; ++j )										// Ici on vas parcourir toute la base B sur laquelle il faut tester si les robots sont voisins de ce un robot i ou pas 
+	Vecteur V; 																								
+	for ( size_t i (0) ; i < A -> robots_base.size() ; ++i ){ 												
+		A -> robots_base[i] -> robots_voisins.clear();																								
+		for ( size_t j (0) ; j < A -> robots_base.size() ; ++j ){										
+			
+			V.norme_vecteur(A -> robots_base[i] -> get_centre() , 
+							A -> robots_base[j]-> get_centre() ); 					
+																																 
+																																									
+			if ( V.get_norme() <= rayon_comm ) 																				 
 			{
-				V.norme_vecteur( A -> robots_base[i] -> get_centre() , B -> robots_base[j]-> get_centre() ); 					// on calcule la distance entre le Robot [i] 
-																																// de la base A et chaque Robot [j] de la 
-																																//cout << "norme entre robots" << V.get_norme() << endl;																		 		// base B pour voir si ils sont distants de moins de 300m
-				if ( V.get_norme() <= rayon_comm ) 																				// On regarde si la distance entre les deux robots est de moins de 300 mètres. 
-				{
-					if ( (V.egalite(A -> get_centre(), B -> get_centre()) == true) and ( A-> robots_base[i] -> get_uid() == B -> robots_base[j] -> get_uid() )) // cette boucle est pour assurer que l'on ne se prenne pas soit même comme voisins
-																																								// Ainsi la condition critque à tester est: Est ce qu'il s'agit de la mênme base ?
-																																								// dans quel cas le test d'égalité revoie true et pour assurer que l'on peut se prendre 
-					{}else {																																    // des robots de la même base comme voisins on fait le test uid
-						A -> robots_base[i] -> robots_voisins.push_back ( B->robots_base[j]-> copie()); 																	// donc si ces deux conditions finissent par être vraies on ne fait rien, sinon on ajoute 
-					}																																			//le robot de la base B numéro [j]
-				}
+				if (A-> robots_base[i] -> get_uid() == 
+					A -> robots_base[j] -> get_uid()){} 
+																																									
+				else {																																    
+					A->robots_base[i]-> robots_voisins.
+					push_back ( A->robots_base[j]-> copie()); 																 
+				}							
 			}
 		}
-	 
-	
+	}	
 }
 
 
-void Simulation::ajout_base ( Base* A ){
+void Simulation::ajout_base ( shared_ptr<Base> A ){
 
 	bool intersection_base (false),intersection_gisement(false);
 	int base(0),gisement(0);
 	
 	//Verification d'intersection base-gisement
 	for ( size_t i (0); i < liste_gisement.size() ; i++ ){
-		if (intersection_deux_cercles ( A -> get_cercle(), liste_gisement[i] -> getCercleG())){
-
-				intersection_gisement = true; 
-				gisement= static_cast<int>(i);
+		if(intersection_deux_cercles(A->get_cercle(),liste_gisement[i]->getCercleG())){
+			intersection_gisement = true; 
+			gisement= static_cast<int>(i);
 		}
 	}
-	for ( size_t i (0); i < liste_base.size() ; i++ )		{
-		if (intersection_deux_cercles ( A -> get_cercle(), liste_base[i] -> get_cercle()))  {
+	for ( size_t i (0); i < liste_base.size() ; i++ ){
+		if (intersection_deux_cercles (A->get_cercle(),liste_base[i]->get_cercle())){
 
-				intersection_base = true; 
-				base= static_cast<int>(i);			
+			intersection_base = true; 
+			base= static_cast<int>(i);			
 		}		
 	}
 	//Verification d'intersection gisement-gisement		
 	if (intersection_gisement==true){
-		std::cout<<message::base_field_superposition(A -> get_x(), A -> get_y(),
-													liste_gisement[gisement] -> get_x(),
-													liste_gisement[gisement] -> get_y());
+		std::cout<<message::base_field_superposition(A->get_x(),A->get_y(),
+													liste_gisement[gisement]->get_x(),
+													liste_gisement[gisement]->get_y());
 		++erreurs;
 	}
 	else if (intersection_base==true){
-		std::cout<<message::base_superposition(A -> get_x(), A-> get_y(),liste_base[base] -> get_x()
-												,liste_base[base] -> get_y());
+		std::cout<<message::base_superposition(	A -> get_x(), A-> get_y(),
+												liste_base[base] -> get_x(),
+												liste_base[base] -> get_y());
 		++erreurs;
 	} 
 	else if ( intersection_base == false) {
@@ -435,39 +444,6 @@ void Simulation::ajout_base ( Base* A ){
 	}
 }
 
-
-
-
-void Simulation :: effacer ( Base* A )
-{
-	for ( size_t i(0) ; i < liste_base.size() ; i++ ) 
-	{
-		if ( liste_base[i] -> get_ressources() <= 0 ) 
-		{
-			for ( size_t j(0) ; i< liste_base[i] -> robots_base.size(); j++ )
-			{
-				cout << " point critique pour éffacer " << endl; 
-			delete liste_base[i] -> robots_base[j]; 
-			}
-		} 
-	}
-}
-	
-void Simulation :: AffichageRobots () 
-{
-	for ( size_t j (0) ; j < total_robots.size() ; j++ )
-	{
-		//cout << total_robots[j]->get_uid() << "  " << total_robots[j]-> get_compteur_de_distance() << " " << total_robots[j]-> get_x() << " " 
-		//	<< total_robots[j]-> get_y() << " " <<  total_robots[j]-> get_But().get_x() << " " << total_robots[j]-> get_But().get_y() << " " << total_robots[j]->get_atteint() << endl; 
-	
-	
-	
-	}
-	
-}
-bool test () 
-{return true; 
-}
 
 bool Simulation::get_erreur(){
 	return erreur;
@@ -477,68 +453,43 @@ bool Simulation::get_erreur(){
 
 void Simulation :: simulation ()
 {
-
+	TabTotalRobot();									
+	for ( size_t i(0) ; i < liste_base.size() ; i++ ){
 	
-	TabTotalRobot();
+		for ( size_t j(0) ; j < liste_base.size() ; j++) {
+			update_voisins ( liste_base[i]); 									
+		}		
 
-										
-	for ( size_t i(0) ; i < liste_base.size() ; i++ )
-	{
-		if ( true)//liste_base[i] -> get_vie() )
-		{ 
-		 
-			for ( size_t j(0) ; j < liste_base.size() ; j++) 
-			{
-			update_voisins ( liste_base[i] , liste_base[j] ); 									
-			}		
-								cout << " qt de ressources 1 " << liste_base[i]-> get_ressources() << endl;	
 		TabRobotsConnectBases(liste_base[i]); 									
-		maintenance_bases(liste_base[i]); // fuite discrete de ressources 	 
-		creation (liste_base[i]) ;	
-			cout << " qt de ressources 2 " << liste_base[i]-> get_ressources() << endl; 																	
+		maintenance_bases(liste_base[i]); 
+		creation (liste_base[i]) ;															
 		update_remote (liste_base[i]);	
 		update_autonomous ( liste_base[i]); 		
-		
+		MajBase();
 			 					
 		
 		
 																			
 		for ( size_t j (0) ; j < liste_base[i]-> robots_base.size() ; j++ ) 
-		{	
-		if ( liste_base[i]-> robots_base[j]->get_type() == 'P' or liste_base[i]-> robots_base[j]->get_type() == 'T'   ) 
-			{ 
-				
+			{	
+			if (liste_base[i]-> robots_base[j]->get_type() == 'P' or 
+				liste_base[i]-> robots_base[j]->get_type() == 'T'){ 
+		
+			
 				cout << "type " << liste_base[i] -> robots_base[j] -> get_type() 
 				<< " xpos " << liste_base[i]-> robots_base[j]-> get_centre().get_x()
-				 << " ypos " <<  liste_base[i]-> robots_base[j]->get_centre().get_y()
-				 << "xbut: " << liste_base[i]-> robots_base[j]->get_But().get_x()
-				 << " ybut: " << liste_base[i]-> robots_base[j]->get_But().get_y() 
-				 << " atteint " << liste_base[i]-> robots_base[j]->get_atteint() 
-				 << " found  " << liste_base[i]-> robots_base[j]-> P_get_found()
-				 << " connecté " << liste_base[i]-> robots_base[j]-> get_Connect() << endl; 
+				<< " ypos " <<  liste_base[i]-> robots_base[j]->get_centre().get_y()
+				<< "xbut: " << liste_base[i]-> robots_base[j]->get_But().get_x()
+				<< " ybut: " << liste_base[i]-> robots_base[j]->get_But().get_y() 
+				<< " atteint " << liste_base[i]-> robots_base[j]->get_atteint() 
+				<< " found  " << liste_base[i]-> robots_base[j]-> P_get_found()
+				<< " connecté " << liste_base[i]-> robots_base[j]-> get_Connect()
+				<< " retour " <<  liste_base[i]-> robots_base[j]-> get_retour()<< endl; 
 			}
 		}
-			cout << " fin algo " << endl;  
-		}
+		cout << " fin algo " << endl;  
 	}
 }
-
-		
-		
-
-		
-		
-/***
-		for ( size_t j (0) ; j < liste_base[i]->robots_remote.size() ; j++ ) 
-		{
-			cout << " xpos " << liste_base[i]-> robots_remote[j]-> get_centre().get_x()
-			 << " ypos " <<  liste_base[i]-> robots_remote[j]->get_centre().get_y()
-			 << "xbut: " << liste_base[i]-> robots_remote[j]->get_But().get_x()
-			 << " ybut: " << liste_base[i]-> robots_remote[j]->get_But().get_y() 
-			 << " atteint " << liste_base[i]-> robots_remote[j]->get_atteint() << endl; 
-		}
-
-***/
 
 
 

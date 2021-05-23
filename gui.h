@@ -78,7 +78,7 @@ public:
 	  virtual ~Windowx();
 
 protected:
-	Simulation* simulation;
+	shared_ptr<Simulation> simulation;
   //Signal handlers:
   // Keyboard signal handler:     
 	
@@ -127,7 +127,7 @@ protected:
 void draw_bases(int height, int width);
 void draw_gisements(int height , int width);
 void draw_link(int height,int width,int base);
-void set_simulation(Simulation* simulation);
+void set_simulation(shared_ptr<Simulation> simulation);
 
 void save(char* filename);
 

@@ -4,7 +4,7 @@
 
 using namespace std;
 
-//=========================================================Robot-biblio get set========================================================================================================
+//=========================================================Robot-biblio get set========
 
 
 Robot::Robot ( 	int id , double p , double x , double y , double x1 , double y1, 
@@ -40,7 +40,7 @@ bool Robot ::  get_jus () {
 return jus; 	 
 }
 
-Robot* Robot::get_voisin(int i) const{
+ shared_ptr <Robot> Robot::get_voisin(int i) const{
 	return robots_voisins[i];}
 
 int Robot::voisin_size()const{
@@ -136,7 +136,7 @@ retour = a ;
 }
 Robot :: ~Robot() {}
 
-//=========================================================Prospecteur=====================================================================================================================
+//=========================================================Prospecteur=================
 
 Prospecteur :: Prospecteur (int id,double par,double x_1,double y_1,double x3,
 							double y3,string a,string r,string f,double x4,
@@ -160,109 +160,104 @@ Prospecteur :: Prospecteur (int id,double par,double x_1,double y_1,double x3,
 }
 
 
-Robot* Prospecteur ::  copie()  {
-	return new Prospecteur(*this);
+ shared_ptr <Robot> Prospecteur ::  copie()  {
+	return shared_ptr<Prospecteur>(new Prospecteur(*this));
 }
 	
 Prospecteur :: ~ Prospecteur() {}
 
 
 
-void Prospecteur :: mode_remote ( vector < Robot* >& rob ,vector < Gisement* > tabg )										// on vas faire cycler tous les gisements voir si il y est 
+void Prospecteur :: mode_remote (  	vector < shared_ptr<Robot> >& rob ,
+									vector < shared_ptr <Gisement> > tabg  )									
 {																						
-	Vecteur V;
-																								//	cout << " mode remote P atteint " << endl; 
-	if ( found == false ) 																			// on regarde si le robot de prospection n'a pas déjà trouve un gisement. En effet on veut qu'il cherche à chaque simulation
-																									// même sur le chemin du retour comme la maintenance est gratuite  
-	{ 	
-		for ( size_t i (0); i < tabg.size() ; i++ ) 
-		 {																														 // plutôt faire ces checks avant une instance plus haut comme ca aucune de nos fonctions autonomous n'admet d'arguments
-			V.norme_vecteur( tabg[i] -> getCercleG().get_centre() , pos ); 	 													// check pour l'intersection avec un gisement et vérifie qu'il ne soit pas vide
-			if( tabg[i] -> getCercleG().get_rayon() > V.get_norme() and tabg[i] -> get_qt_resources() > deltaR ) 					// on vérifie qu'il ne soit pas vide ou au moins qu'il y ait un forage et on laisse la prise de décision à la base 
-				{ 
-					// mettre un bool de presence de robot de forage dans les voisins ici pour ignorer le gisement au bseoins
-					found = true;																										// on indique que l'on a trouvé un Gisement					
-					xg = tabg[i] -> getCercleG().get_x();																				// on mémorise ses données 
+	Vecteur V;				
+	if ( found == false ) {																		
+		for ( size_t i (0); i < tabg.size() ; i++ ) {																									
+			V.norme_vecteur( tabg[i] -> getCercleG().get_centre() , pos ); 	 												
+			if( tabg[i] -> getCercleG().get_rayon() > V.get_norme() and 
+				tabg[i] -> get_qt_resources() > deltaR ){ 
+				bool connu ( false ); 
+				for ( size_t j(0) ; j < rob.size() ; j++ ){ 
+					if (rob[j]->get_type()== 'F' and rob[j]->get_Connect()==true){ 
+					
+						if(	rob[j]->get_But().get_x()==tabg[i]->
+							getCercleG().get_x() and  rob[j] -> get_But().
+							get_y() ==  tabg[i] -> getCercleG().get_y()){
+							connu = true;
+						}
+					}	
+				}
+				if ( connu == false ){
+					found = true;																														
+					xg = tabg[i] -> getCercleG().get_x();																				
 					yg = tabg[i] -> getCercleG().get_y();
 					taille = tabg[i] -> getCercleG().get_rayon();
-					capacite = tabg[i] -> get_qt_resources();
-					rentrer_base();																										// on ordonne au robot de rentrer
-				} 
+					capacite = tabg[i] -> get_qt_resources();	
+				}																								
+			} 
 		}	
 	}
-	 
-	if ( found == false ) 																												// si on n'a pas trouvé de gisement ca implique que le found est false 
-	{ 
-		Point P ;
-		P.set_coordonnes ( x_base , y_base ) ; 
-		V.norme_vecteur ( pos , P );  																									// on calcule la distance à la base 
-		if ( (maxD_prosp - compteur_de_distance - 2* deltaD) < V.get_norme() ) 															 // on ajoute les deltaD pour être sur que le robot rentre bien à temps même et donner de la marge
-		{
-			retour = true;  																											// indique que le robot doit rentrer 
-			rentrer_base(); 																											// ordre donné 
-			
-		}
-		else if ( atteint == true )
-		{ 																										// on crée de nouvelles coordonnes au piff si jamais on est arrivé à notre destination
-				int signe = randomNb ( 4 ); 																								// on crée une variable qui vas decider de la combinaison de notre but, ++ , -+ , +- ou -- 
-				double alleX = randomNb ( 1000 );																							 // les deux variables qui vont prendre des coordonnées dans le monde au hasard 
-				double alleY = randomNb ( 1000 );  
-				
-				if ( signe == 1 ) // on donne les 4 cas du signe 
-				{
-				but.set_coordonnes( alleX , alleY );
-				}else if ( signe == 2) 
-				{
-				but.set_coordonnes(  alleX , - alleY );
-				}else if ( signe == 3) 
-				{
-				but.set_coordonnes(  - alleX , alleY );
-				}else if ( signe == 4) 
-				{
-				but.set_coordonnes(  - alleX , - alleY );
-				}
-				atteint = false; 
-		} // utiliser la fonction random pour générer deux coordonnées alléatoires et yalla. Je l'ai fait mtn de telle manière qu'il prend 2 chiffres au hasard entre 0 et 1000 et on a un chiffre signe qui dit si on fait ++ +- -+ --
-	}	  // il faut absolument revoir la fonction je sais pas si elle marche 
+	Point P ;
+	P.set_coordonnes(x_base ,y_base); 
+	V.norme_vecteur(pos,P);  																				
+	if ( (maxD_prosp - compteur_de_distance -  deltaD) <= V.get_norme()){
+		retour = true;  																									
+		rentrer_base(); 																										 		
+	}
 	
+	if (atteint == true and (maxD_prosp-compteur_de_distance-deltaD) > V.get_norme()){																										// on crée de nouvelles coordonnes au piff si jamais on est arrivé à notre destination
+		int signe = randomNb ( 4 ); 																								// on crée une variable qui vas decider de la combinaison de notre but, ++ , -+ , +- ou -- 
+		double alleX = randomNb ( 1000 );																							 // les deux variables qui vont prendre des coordonnées dans le monde au hasard 
+		double alleY = randomNb ( 1000 );  
+				
+		switch (signe){
+			case (1):	
+			but.set_coordonnes( alleX , alleY );
+			break;
+				
+			case 2:
+			but.set_coordonnes(  alleX , - alleY );
+			break;
+				
+			case 3:
+			but.set_coordonnes(  - alleX , alleY );
+			break;
+				
+			case 4:
+			but.set_coordonnes( - alleX , - alleY );
+			break;
+		}
+		
+		atteint = false; 
+	}
+	//found = false;
 	deplacement_vers_but();
 }
 
-void Prospecteur :: mode_autonome(vector < Robot* >& rob , vector < Gisement* > tabg){ 												// ici aussi le propsecteur ne change rien dans son mode remote que dans son mode connecté, on a uniquement l'avantage que l'on connait à tout 
-																											// moment ce qu'il sait
-Vecteur V; 
-
-
-if ( (maxD_prosp - compteur_de_distance - 2* deltaD) < V.get_norme() )  									// on ajoute les deltaD pour être sur que le robot rentre bien à temps même et donner de la marge
-		{
-			retour = true;  																				// indique que le robot doit rentrer 
-			rentrer_base(); 																				// ordre donné 
-			
-		}
-
-if ( atteint == true and retour == false and found == false ) {
-																					// on ne peut que rechercher si on atteint notre but
-		for ( size_t i (0); i < tabg.size() ; i++ )																				// on regarde si le robot de prospection n'a pas déjà trouve un gisement. En effet on veut qu'il cherche à chaque simulation																											// même sur le chemin du retour comme la maintenance est gratuite  
-		{ 																 									// plutôt faire ces checks avant une instance plus haut comme ca aucune de nos fonctions autonomous n'admet d'arguments
-			V.norme_vecteur( tabg[i] -> getCercleG().get_centre() , pos ); 	 									// check pour l'intersection avec un gisement et vérifie qu'il ne soit pas vide
-			if( tabg[i] -> getCercleG().get_rayon() < V.get_norme() and tabg[i] -> get_qt_resources() > deltaR ) 		// on vérifie qu'il ne soit pas vide ou au moins qu'il y ait un forage et on laisse la prise de décision à la base 
-				{ 
-					found = true;																			// on indique que l'on a trouvé un Gisement					
-					xg = tabg[i]  -> getCercleG().get_x();															// on mémorise ses données 
+void Prospecteur :: mode_autonome( 	vector < shared_ptr<Robot> >& rob ,
+									vector < shared_ptr <Gisement> > tabg ){ 												
+																											
+	Vecteur V; 
+	if ((maxD_prosp - compteur_de_distance - 2* deltaD) < V.get_norme()) {									
+			retour = true;  																				
+			rentrer_base(); 																				
+	}
+	if ( atteint == true ) {																			
+		for ( size_t i (0); i < tabg.size() ; i++ )	{	
+				V.norme_vecteur( tabg[i] -> getCercleG().get_centre() , pos );		
+				if( tabg[i] -> getCercleG().get_rayon() < V.get_norme() and 
+					tabg[i] -> get_qt_resources() > deltaR ) 		
+					{ 
+					found = true;																						
+					xg = tabg[i]  -> getCercleG().get_x();															
 					yg =  tabg[i] -> getCercleG().get_y();	
 					taille = tabg[i]  -> getCercleG().get_rayon();
 					capacite = tabg[i]  -> get_qt_resources();
-					rentrer_base();																			// on ordonne au robot de rentrer
-				} 
-		}
-	
-	atteint = false;
-	rentrer_base();	
-	
-}else{
-deplacement_vers_but (); 									
-}
-
+					rentrer_base();																		
+			} 
+		}	
+	} else deplacement_vers_but (); 									
 }
 
 
@@ -276,13 +271,6 @@ void Prospecteur :: set_taille( double t ){ taille = t ; }
 void Prospecteur :: set_capacite ( double c ){ capacite = c ; }
 	
 bool Prospecteur :: get_found () const { return found; } 
-
-/***
-double Prospecteur :: get_xg () const{ return xg ; }
-double Prospecteur :: get_yg () const{ return yg ; }
-double Prospecteur :: get_taille () const{ return taille ; }
-double Prospecteur ::  get_capacite () const{ return capacite ; }
-***/
 	
 double Prospecteur :: P_get_xg () { return xg; }
 double Prospecteur :: P_get_yg () { return yg; }
@@ -295,24 +283,24 @@ void Prospecteur :: deplacement_vers_but ()
 	if ( compteur_de_distance < maxD_prosp ) {
 		double D, r, m; 
 		Vecteur V; 
-				V.norme_vecteur( pos , but );  
-				D = V.get_norme();
-				r = fmod( D , deltaD ); 
-				m = ( D - r) / deltaD; 
-			if ( D < deltaD ) {
-				pos.set_coordonnes( but.get_x() , but.get_y() ); 
-				atteint = true; 
-				compteur_de_distance= compteur_de_distance + 5. ; 
-			}else { 
-				pos.set_coordonnes ( pos.get_x() + (V.get_vect_x()/m) , pos.get_y() + (V.get_vect_y()/m));
-				compteur_de_distance = compteur_de_distance + 5. ; 
-			}
-			
-			pos.normalisation(pos); 
+		V.norme_vecteur( pos , but );  
+		D = V.get_norme();
+		r = fmod( D , deltaD ); 
+		m = ( D - r) / deltaD; 
+		if ( D < deltaD ) {
+			pos.set_coordonnes( but.get_x() , but.get_y() ); 
+			atteint = true; 
+			compteur_de_distance= compteur_de_distance + 5. ; 
+		}else { 
+			pos.set_coordonnes ( 	pos.get_x() + (V.get_vect_x()/m) , 
+									pos.get_y() + (V.get_vect_y()/m));
+			compteur_de_distance = compteur_de_distance + 5. ; 
+		}	
+		pos.normalisation(pos); 
 	}
 }
 
-//=========================================================Forage====================================================================================
+//=========================================================Forage======================
 
 Forage :: Forage (	int id,double par,double x_1,double y_1,double x3,double y3,
 						string a): Robot ( id , par , x_1 ,y_1 ,x3 , y3 , a) {
@@ -321,156 +309,113 @@ Forage :: Forage (	int id,double par,double x_1,double y_1,double x3,double y3,
 }
 
 
-void Forage :: GisementPlein ( Gisement*C ) 
+void Forage :: GisementPlein ( shared_ptr <Gisement> C ) 
 {
-	if( C-> get_qt_resources() < deltaR ){
-	plein = false;
-	}else{
-	plein = true; 
-	}
+	if( C-> get_qt_resources() < deltaR ) plein = false;
+	else plein = true; 
+	
 }
 
 
-Robot* Forage::  copie() {
-	return new Forage(*this);
+ shared_ptr <Robot>  Forage::  copie() {
+	return shared_ptr<Forage>(new Forage(*this));
 }
 
 Forage :: ~ Forage() {}
 
-void Forage :: forage ( Gisement* A )
+void Forage :: forage ( shared_ptr  <Gisement> A )
 { 
-double d = A -> get_qt_resources() - deltaR ;  
-A -> set_qt_ressources ( d );  				   												
+	double d = A -> get_qt_resources() - deltaR ;  
+	A -> set_qt_ressources ( d );  				   												
 } 
 
-void Forage :: mode_autonome ( vector < Robot* >& rob ,vector < Gisement* > tabg ) 		
-{	
-	Vecteur V;  
-	
-	if ( atteint == false  )
-	{
-		deplacement_vers_but();
-	} 
-	else if ( atteint == true )
-	{ 	
-		for ( size_t j (0) ; j < tabg.size() ; j++ )
-		{
-			if( V.egalite( tabg[j] -> getCercleG().get_centre() , pos ) )														
-			{ 	
+void Forage :: mode_autonome (  vector < shared_ptr<Robot> >& rob ,
+								vector < shared_ptr <Gisement> > tabg ) {	
+	Vecteur V; 
+	if ( atteint == false  ) deplacement_vers_but();
+	else if ( atteint == true ){ 	
+		for ( size_t j (0) ; j < tabg.size() ; j++ ){
+			V.norme_vecteur (tabg[j] -> getCercleG().get_centre() , pos);
+			if( V.get_norme() <= tabg[j] -> getCercleG().get_rayon() ){														
 				GisementPlein( tabg[j] );																						 
-				if ( plein == true )																					
-				{	
-					for ( size_t i (0) ; i < robots_voisins.size() ; i++) 
-					{
-						bool fait (false); 																			
-						if ( fait == false and robots_voisins[i] -> get_type() == 'T' and robots_voisins[i] -> get_retour() == false) 																																
-						{  
-								Vecteur D ; 
-								if (D.egalite( pos , robots_voisins[i] -> get_centre() ) == true) 
-								{	
-									for ( size_t t (0) ; t < rob.size() ; t++ ) 
-									{	
-										if ( rob[t]-> get_uid() == 	robots_voisins[i] -> get_uid() ) 
-										{											
-											forage(tabg[j]);
+				if ( plein == true ){																					
+					for ( size_t i (0) ; i < rob.size() ; i++) {; 																			
+						Vecteur D ;
+						if (rob[i]->get_type() == 'T' and 
+							D.egalite(pos,rob[i]->get_centre())){ 																																 
+							for ( size_t t (0) ; t < rob.size() ; t++ ){ 
+								if ( rob[t]-> get_uid() == 	rob[i] -> get_uid()){ 											
+									forage(tabg[j]);
+									rob[i] -> set_retour ( true ) ; 																	
+									rob[i] -> set_but( x_base , y_base );}												
+							}																
+						}	
+					}
+				}else{
+					jus = false ; 
+					for ( size_t i (0) ; i < robots_voisins.size() ; i++) {																	
+						if ( 	rob[i] -> get_type() == 'T' and 
+								rob[i] -> get_retour() == false){																																
+							Vecteur D ; 
+							if (D.egalite( pos , rob[i] -> get_centre() ) == true) {
+								for ( size_t t (0) ; t < rob.size() ; t++ ) {
+									if ( 	rob[t]-> get_uid() == 	
+											robots_voisins[i] -> get_uid() ) {					
 											rob[i] -> set_retour ( true ) ; 																	
-											rob[i] -> set_but( x_base , y_base );											
-											fait = true;	
-										}
-									}																
-								}
+											rob[i] -> set_but( x_base , y_base );}												
+								}																
+							}
 						}
 					}
-				}else {
-				jus = false ; 
-					for ( size_t i (0) ; i < robots_voisins.size() ; i++) 
-					{ 																			
-						if ( robots_voisins[i] -> get_type() == 'T' and robots_voisins[i] -> get_retour() == false) 																																
-						{  
-								Vecteur D ; 
-								if (D.egalite( pos , robots_voisins[i] -> get_centre() ) == true) 
-								{	
-									for ( size_t t (0) ; t < rob.size() ; t++ ) 
-									{	
-										if ( rob[t]-> get_uid() == 	robots_voisins[i] -> get_uid() ) 
-										{					
-											rob[i] -> set_retour ( true ) ; 																	
-											rob[i] -> set_but( x_base , y_base );												
-										}
-									}																
-								}
-						}
-					}
-					
 				}
 			}
 		} 
 	}
 }
 
-void Forage ::  mode_remote (vector < Robot* >& rob , vector < Gisement* > tabg){
- 
+
+
+void Forage ::  mode_remote ( 	vector < shared_ptr<Robot> >& rob ,
+								vector < shared_ptr <Gisement> > tabg ){
 	Vecteur V;  
-	
-	if ( atteint == false  )
-	{
-		deplacement_vers_but();
-	} 
-	else if ( atteint == true )
-	{ 	
-		for ( size_t j (0) ; j < tabg.size() ; j++ )
-		{
-			if( V.egalite( tabg[j] -> getCercleG().get_centre() , pos ) )														
-			{ 	
+	if ( atteint == false  ) deplacement_vers_but();
+	else if ( atteint == true ){
+		for ( size_t j (0) ; j < tabg.size() ; j++ ){
+			V.norme_vecteur (tabg[j] -> getCercleG().get_centre() , pos);
+			if( V.get_norme() <= tabg[j] -> getCercleG().get_rayon() ){														
 				GisementPlein( tabg[j] );																						 
-				if ( plein == true )																					
-				{
-					for ( size_t i (0) ; i < robots_voisins.size() ; i++) 
-					{
-						bool fait (false); 																			
-						if ( fait == false and robots_voisins[i] -> get_type() == 'T' and robots_voisins[i] -> get_retour() == false) 																																
-						{  
-								Vecteur D ; 
-								if (D.egalite( pos , robots_voisins[i] -> get_centre() ) == true) 
-								{	
-									for ( size_t t (0) ; t < rob.size() ; t++ ) 
-									{	
-										if ( rob[t]-> get_uid() == 	robots_voisins[i] -> get_uid() ) 
-										{ 
-											forage(tabg[j]);
-											rob[t] -> set_retour ( true ) ; 																	
-											rob[t] -> set_but( x_base , y_base ); 											
-											fait = true;	
-										}
-									}																
-								}
-						}
-					}
-				}else {
-					for ( size_t i (0) ; i < robots_voisins.size() ; i++) 
-					{ 																			
-						if ( robots_voisins[i] -> get_type() == 'T' and robots_voisins[i] -> get_retour() == false) 																																
-						{  
-							Vecteur D ; 
-							if (D.egalite( pos , robots_voisins[i] -> get_centre() ) == true) 
-							{	
-								for ( size_t t (0) ; t < rob.size() ; t++ ) 
-								{	
-									if ( rob[t]-> get_uid() == 	robots_voisins[i] -> get_uid() ) 
-									{					
-										rob[i] -> set_retour ( true ) ; 																	
-										rob[i] -> set_but( x_base , y_base );												
-									}
-								}																
+				if ( plein == true ){																					
+					for ( size_t i (0) ; i < robots_voisins.size() ; i++) {																
+						Vecteur D ; 
+						if (robots_voisins[i] -> get_type() == 'T' and 
+							robots_voisins[i] -> get_retour() == false and 		
+							D.egalite(pos,robots_voisins[i]->get_centre() ) == true){ 
+							for ( size_t t (0) ; t < rob.size() ; t++ ){ 
+								if (rob[t]->get_uid()==robots_voisins[i]->get_uid()) {		
+									forage(tabg[j]);
+									rob[t] -> set_retour ( true ) ; 
+									rob[t] -> set_but( x_base , y_base ); }																
 							}
 						}
 					}
-					
-				}
+				}else if ( plein == false )  {
+					for ( size_t i (0) ; i < robots_voisins.size() ; i++) {																		
+						Vecteur D;
+						if ( robots_voisins[i] -> get_type() == 'T' and
+							 D.egalite(pos,robots_voisins[i]->get_centre()) == true){
+							for ( size_t t (0) ; t < rob.size() ; t++ ) {
+								if(rob[t]->get_uid()==robots_voisins[i]->get_uid()){ 			
+									rob[i] -> set_retour ( true ) ; 																	
+									rob[i] -> set_but( x_base , y_base );}												
+							}																
+						}
+					}
+				}	
 			}
-		} 
-	}			
-}
+		}
+	} 
+}			
+
 
 void Forage :: P_set_found ( bool a ) {}; 
 
@@ -494,7 +439,8 @@ void Forage :: deplacement_vers_but ()
 				atteint = true; 
 				compteur_de_distance= compteur_de_distance + r ; 
 			}else { 
-				pos.set_coordonnes ( pos.get_x() + (V.get_vect_x()/m) - (r/m), pos.get_y() + (V.get_vect_y()/m) - (r/m));
+				pos.set_coordonnes ( 	pos.get_x() + (V.get_vect_x()/m) - (r/m), 
+										pos.get_y() + (V.get_vect_y()/m) - (r/m));
 				compteur_de_distance = compteur_de_distance + 5. ; 
 			}
 			
@@ -503,7 +449,7 @@ void Forage :: deplacement_vers_but ()
 }
 
 
-//=========================================================Transport====================================================================================
+//=========================================================Transport===================
 
 Transport :: Transport (int id,double par,double x_1,double y_1,double x3,
 						double y3, string a,string r)
@@ -512,41 +458,39 @@ Transport :: Transport (int id,double par,double x_1,double y_1,double x3,
 	type = 'T';
 }
 
- Robot* Transport ::  copie()  {
-	return new Transport(*this);
+shared_ptr <Robot> Transport ::  copie()  {
+	return shared_ptr<Transport>(new Transport(*this));
 }
 
 Transport :: ~Transport() {}
 
-void Transport :: mode_autonome ( vector < Robot* >& rob ,vector < Gisement* > tabg)
+void Transport :: mode_autonome ( 	vector < shared_ptr<Robot> >& rob ,
+									vector < shared_ptr <Gisement> > tabg )
 {
 	cout << " mode autonaume de T " << endl ; 
 	Vecteur V;  
-	V.norme_vecteur( pos , but ); 	// on trouve la norme 
-	if ( V.get_norme() != 0 )		// on la renvoi 
-		{
-			deplacement_vers_but();		// on remarque ici que le robot de transport ressemble beaucoup au robot de communication
-		}else{						// il ne fait que aller vers son but, son chargement est pris en charge par le robot de forage et 
-			if (retour == true ){		// son but est fixé par le même robot ou par la base et si son but est atteint alors qu'il y reste jusqu'à nouvel ordre.
+	V.norme_vecteur( pos , but ); 	
+	if ( V.get_norme() != 0 ){
+		
+		deplacement_vers_but();		
+	}else{						
+		if (retour == true ){		
 			 rentrer_base();
 		}
 	} 
 }
 
-void Transport ::  mode_remote ( vector < Robot* >& rob ,vector < Gisement* > tabg ){ //en soit le mode remote ne change rien du mode autonome car le robot de transport fait exactement la même chose qu'il soit connecté ou pas
-	cout << " mode remote de T " << endl; 
-	mode_autonome( rob , tabg );
+void Transport ::  mode_remote ( 	vector < shared_ptr<Robot> >& rob ,
+									vector < shared_ptr <Gisement> > tabg  ){ 
+	
 	Vecteur V;  
 	V.norme_vecteur( pos , but ); 	
-	if ( V.get_norme() != 0 )		
-		{
-			deplacement_vers_but();		
-		}else{						
-			if (retour == true ){		
+	if ( V.get_norme() != 0 ){
+		deplacement_vers_but();		
+	}else{							
 			 rentrer_base();
-		}
+		
 	} 
-	cout << " but x T : " << get_But().get_x() << " but y T : " << get_But().get_y() << endl;  
 }
 
 
@@ -571,17 +515,18 @@ void Transport :: deplacement_vers_but ()
 			if ( D < deltaD ) {
 				pos.set_coordonnes( but.get_x() , but.get_y() ); 
 				atteint = true; 
-				compteur_de_distance= compteur_de_distance + 5. ; 
+				compteur_de_distance= compteur_de_distance + deltaD ; 
 			}else { 
-				pos.set_coordonnes ( pos.get_x() + (V.get_vect_x()/m) , pos.get_y() + (V.get_vect_y()/m));
-				compteur_de_distance = compteur_de_distance + 5. ; 
+				pos.set_coordonnes ( 	pos.get_x() + (V.get_vect_x()/m) , 
+										pos.get_y() + (V.get_vect_y()/m));
+				compteur_de_distance = compteur_de_distance + deltaD ; 
 			}
 			
 			pos.normalisation(pos); 
 	}
 }
 
-//=========================================================Communication====================================================================================
+//=========================================================Communication==============
 		
 Communication :: Communication (int id,double par,double x_1,double y_1,double x3,
 								double y3,std::string a)
@@ -592,20 +537,22 @@ Communication :: Communication (int id,double par,double x_1,double y_1,double x
 
 }
 
-Robot* Communication ::  copie() {
-	return new Communication(*this);
+shared_ptr <Robot> Communication ::  copie() {
+	return shared_ptr<Communication>(new Communication(*this));
 }
 
 Communication :: ~Communication() {}
 
-void Communication :: mode_autonome (vector < Robot* >& rob , vector < Gisement* > tabg )
+void Communication :: mode_autonome ( 	vector < shared_ptr<Robot> >& rob ,
+										vector < shared_ptr <Gisement> > tabg  )
 {
-	if ( atteint == false ) {															// relativement simple, si tu n'es pas immobile alors deplace toi vers le but sinon bouge pas et joue ton rôle de noeud. 
-	deplacement_vers_but(); 															// ici on a affaire à un robot qui n'as rien à voir avec les gisements et tout simplement peut se permettre d'ignorer l'argument passé
+	if ( atteint == false ) {															
+	deplacement_vers_but(); 															
 	}
 }
 
-void Communication :: mode_remote (vector < Robot* >& rob , vector < Gisement* > tabg )		
+void Communication :: mode_remote ( vector < shared_ptr<Robot> >& rob ,
+									vector < shared_ptr <Gisement> > tabg  )		
 {
 
 	if ( atteint == false ) {			
@@ -636,7 +583,8 @@ void Communication :: deplacement_vers_but ()
 				atteint = true; 
 				compteur_de_distance= compteur_de_distance + 5. ; 
 			}else { 
-				pos.set_coordonnes ( pos.get_x() + (V.get_vect_x()/m) , pos.get_y() + (V.get_vect_y()/m));
+				pos.set_coordonnes ( 	pos.get_x() + (V.get_vect_x()/m) , 
+										pos.get_y() + (V.get_vect_y()/m));
 				compteur_de_distance = compteur_de_distance + 5. ; 
 			}
 			
@@ -644,7 +592,7 @@ void Communication :: deplacement_vers_but ()
 	}
 }
 
-//=========================================================Robot algos====================================================================================
+//=========================================================Robot algos=================
 
 
 

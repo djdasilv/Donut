@@ -228,11 +228,11 @@ double Cercle::get_y(){
 	
 	return get_centre().get_y();}
 	
-void Cercle::dessin(char C,int rayon=0){
+void Cercle::dessin(char C,int rayon=0,double ressource=0){
 	Point p = get_centre();	
 	p.coordonnes_equivalentes();
 	for(int i(0); i<10; i++){
-		if (C =='G')dessin_gisement(p.get_equivalent(i,0),p.get_equivalent(i,1), rayon);
+		if (C =='G')dessin_gisement(p.get_equivalent(i,0),p.get_equivalent(i,1), rayon, ressource);
 		} 
 }
 

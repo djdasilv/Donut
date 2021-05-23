@@ -15,9 +15,10 @@ Gisement :: Gisement( double x , double y , double r , double qt)
 	taille_ressources.set_centre( x , y );
 	taille_ressources.set_rayon ( r ) ;
 	set_qt_ressources(qt) ;
-
-
+	ressourceInit=qt;
 };	
+
+Gisement::~Gisement(){}
 
 void Gisement :: set_qt_ressources (double& qt_r)
 {
@@ -28,7 +29,6 @@ double Gisement :: get_qt_resources () const
 {
 	return quantitee_ressources;
 };
-
 
 Cercle Gisement:: getCercleG () const 
 { 
@@ -44,14 +44,6 @@ double Gisement::get_y(){
 	return getCercleG().get_centre().get_y();
 	}
 	
-	
-/**vector <Cercle> getPositionsBases ( )
-{ 
-	vector <Cercle> PG ;
-	for ( size_t i (0) ; i < liste_gisement.size() ; ++i)
-	{ 
-		PG.push_back(liste_gisement[i].getCercleG());
-	}
-	return PG;
+double Gisement::get_vie() const{
+	return (quantitee_ressources/ressourceInit) ;
 }
-***/

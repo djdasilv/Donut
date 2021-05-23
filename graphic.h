@@ -10,7 +10,7 @@ using namespace std;
 
 void dessin_base(int x,int y);
 					
-void dessin_gisement(int x,int y,int rayon);
+void dessin_gisement(int x,int y,int rayon,double ressource);
 
 void dessin_robot();
 void dessin_cadre(int height, int width);
