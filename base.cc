@@ -578,12 +578,20 @@ void Base :: lancement_p()
 	} while ( i < 3 and nbP < 7) ;
 }
 
+shared_ptr<Robot> Base::get_robots_base(int i) const{
+	return robots_base[i];
+}
+
+size_t Base::robots_size() const {
+	return robots_base.size();
+}
+
+vector <shared_ptr<Robot>> Base::get_liste_robot() const{
+	return robots_base;}
 
 
 
-
-
-void rec_DEF( shared_ptr <Base> B ,  shared_ptr <Robot> A ) 													
+void Base::rec_DEF( shared_ptr <Base> B ,  shared_ptr <Robot> A ) 													
 {
 	for ( size_t i (0) ; i < B -> robots_base.size() ; i++ ){ 
 		
@@ -592,11 +600,11 @@ void rec_DEF( shared_ptr <Base> B ,  shared_ptr <Robot> A )
 			B -> robots_base[i]-> set_Connect ( true ) ; 
 		}
 	}
-	for ( size_t j(0) ; j < A -> robots_voisins.size() ; j++ ){
+	for ( size_t j(0) ; j < A -> size_voisin() ; j++ ){
 	
 		for ( size_t i (0) ; i < B -> robots_base.size() ; i++ ){  							
 			
-			if (B->robots_base[i]->get_uid()== A->robots_voisins[j] ->get_uid() and 
+			if (B->robots_base[i]->get_uid()== A->voisin_uid(j) and 
 				B-> robots_base[i] -> get_Connect() == false) {									 
 																																															
 				rec_DEF( B , B-> robots_base[i] ); 

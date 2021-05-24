@@ -60,17 +60,22 @@ class Base {
 		
 	~Base ();
 	Base (const Base& other);
-
+	
+	size_t robots_size() const;
+	shared_ptr<Robot> get_robots_base(int i) const;
+	vector <shared_ptr<Robot>> get_liste_robot() const;
+	void rec_DEF( shared_ptr<Base> B , shared_ptr <Robot> A );
 		
-	vector <shared_ptr<Robot> > robots_base; // faudra le remettre dans private plus tard
-	vector < shared_ptr<Robot> > robots_connect;
-	vector < shared_ptr<Robot> > robot_communication;
-	vector < shared_ptr<Robot> > robots_remote;  
-	vector < shared_ptr<Robot> > robots_autonomous;
-	array<array<double , 3 > , 50 > Monde4G;
 		
 	private:
-		
+	
+	vector <shared_ptr<Robot> > robots_base;
+	vector < shared_ptr<Robot> > robot_communication;
+	vector < shared_ptr<Robot> > robots_remote;	
+	vector < shared_ptr<Robot> > robots_autonomous;
+	
+	array<array<double , 3 > , 50 > Monde4G;
+	
 	int compteur;
 	int max_uid; 
 	int couleur;
@@ -83,13 +88,9 @@ class Base {
 	bool Active4G; 
 	bool vie; 
 };
-
-//		void ajout_base (	Base* A  , std::vector<Base*> & liste_base, 
-//							std::vector<Gisement*>& liste_gisement); 
 		
 		string boolToString(bool a);
 		vector <Cercle> getPositionsBases ( );
-		void rec_DEF( shared_ptr<Base> B , shared_ptr <Robot> A );
 		
 #endif
 

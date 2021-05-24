@@ -27,7 +27,8 @@ class Simulation{
 	void simulation (); // Methode 	qui fait un "step"
 
 	void lecture(char* nom);
-	void set_etat (	int& etat, double nbP, double nbF, double nbT, double nbC,double bases);
+	void set_etat (	int& etat, double nbP, double nbF, double nbT, double nbC,
+					double bases);
 	void decodage_ligne1(string line);
 	void decodage_ligne2(string line);
 	void TabRobotsConnectBases(shared_ptr<Base> A );
@@ -53,6 +54,7 @@ class Simulation{
 	void AffichageRobots ();
 	void set_erreur(int a);
 	bool get_erreur();
+	void reset_erreurs();
 
 
 	private:

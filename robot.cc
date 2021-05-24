@@ -15,7 +15,6 @@ Robot::Robot ( 	int id , double p , double x , double y , double x1 , double y1,
 	compteur_de_distance=0;
 	if (at == "true" ) atteint= true;
 	else atteint = false;
-	//Connect = false;  
 	
 }
 
@@ -40,19 +39,11 @@ bool Robot ::  get_jus () {
 return jus; 	 
 }
 
- shared_ptr <Robot> Robot::get_voisin(int i) const{
-	return robots_voisins[i];}
-
-int Robot::voisin_size()const{
-	return robots_voisins.size();
-}
 void Robot :: set_base ( double xb , double yb )
 {
 	x_base = xb; 
 	y_base = yb;
 }
-
-
 
 void Robot :: rentrer_base ()
 {
@@ -136,6 +127,25 @@ retour = a ;
 }
 Robot :: ~Robot() {}
 
+shared_ptr<Robot> Robot::robot_voisins(int i ) const{
+	return robots_voisins[i];
+}
+
+void Robot::set_voisin(shared_ptr<Robot> voisin){
+	robots_voisins.push_back(voisin);
+}
+
+size_t Robot::size_voisin() const{
+	return robots_voisins.size();
+}
+
+double Robot::voisin_uid(int i) const {
+	return robots_voisins[i]->get_uid();
+}
+
+void Robot::clear_voisins(){
+	robots_voisins.clear();
+}
 //=========================================================Prospecteur=================
 
 Prospecteur :: Prospecteur (int id,double par,double x_1,double y_1,double x3,

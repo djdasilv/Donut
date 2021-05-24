@@ -104,24 +104,25 @@ Windowx::~Windowx()
 bool Windowx::on_idle()			// méthode de gtkm qui est apellé tout le temps 
 								// faite pour mettre à jour la fenêtre 
 {
-  static unsigned count(0);
+	static unsigned count(0);
+	if(not (sim==nullptr)){
+		if(started)
+		{	++count3;
+			cout << "Mise à jour de la simulation numéro : " << ++count << endl;
+			sim->simulation();
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		}
+		else if (step )
+		{
+			step = false;
+			sim->simulation();
+			cout << "Mise à jour de la simulation numéro : " << ++count << endl;
+		}
   
-  if(started and not (sim==nullptr))
-  {	++count3;
-	cout << "Mise à jour de la simulation numéro : " << ++count << endl;
-	sim->simulation();
-	std::this_thread::sleep_for(std::chrono::milliseconds(10));
-  }
-  else if (step and not(sim == nullptr))
-  {
-	step = false;
-	sim->simulation();
-	cout << "Mise à jour de la simulation numéro : " << ++count << endl;
-  }
-  if(not (sim==nullptr)){
-  Area.refresh();		// mise à jour 
-  scroll.tree_view_update();
-}
+	Area.refresh();		// mise à jour 
+	//scroll.tree_view_update();
+	}
+	scroll.tree_view_update();
 
   return true;  // return false when done
 }
@@ -133,55 +134,63 @@ bool Windowx::on_idle()			// méthode de gtkm qui est apellé tout le temps
 Scroll::Scroll()
      :_v_box(Gtk::ORIENTATION_VERTICAL, 10)
 {
-  add(_v_box);
-  // This is the part for the scrolled_window
-  _v_box.add(_scrolled_window);
-  _scrolled_window.set_size_request(-1, 200); 
-  _scrolled_window.add(_tree_view);
+	add(_v_box);
+	// This is the part for the scrolled_window
+	_v_box.add(_scrolled_window);
+	_scrolled_window.set_size_request(-1, 200); 
+	_scrolled_window.add(_tree_view);
 
-  _scrolled_window.set_policy(Gtk::PolicyType::POLICY_AUTOMATIC,
-							  Gtk::PolicyType::POLICY_AUTOMATIC);
-  _scrolled_window.set_hexpand();
+	_scrolled_window.set_policy(Gtk::PolicyType::POLICY_AUTOMATIC,
+								  Gtk::PolicyType::POLICY_AUTOMATIC);
+	_scrolled_window.set_hexpand();
 
-  _tree_view.append_column("nbP", _columns._col_nbP);
-  _tree_view.append_column("nbF", _columns._col_nbF);
-  _tree_view.append_column("nbT", _columns._col_nbT);
-  _tree_view.append_column("nbC", _columns._col_nbC);
-  _tree_view.append_column_numeric("Amount resource", _columns._col_resource, "%.2f");
+	_tree_view.append_column("nbP", _columns._col_nbP);
+	_tree_view.append_column("nbF", _columns._col_nbF);
+	_tree_view.append_column("nbT", _columns._col_nbT);
+	_tree_view.append_column("nbC", _columns._col_nbC);
+	_tree_view.append_column_numeric("Amount resource", _columns._col_resource, "%.2f");
 
-  auto cell = Gtk::make_managed<Gtk::CellRendererProgress>();
-  int cols_count = _tree_view.append_column("Mission completeness", *cell);
+	  auto cell = Gtk::make_managed<Gtk::CellRendererProgress>();
+	  int cols_count = _tree_view.append_column("Mission completeness", *cell);
 
-  auto progress_col = _tree_view.get_column(cols_count - 1);
-  if(progress_col)
-	progress_col->add_attribute(cell->property_value(),
+	auto progress_col = _tree_view.get_column(cols_count - 1);
+	if(progress_col) progress_col->add_attribute(cell->property_value(),
 								_columns._col_resource_percentage);
 	
-  show_all_children();
+	
+	show_all_children();
 }
 
 Scroll::~Scroll(){}
 
 void Scroll::tree_view_update()
 {
-  Glib::RefPtr<Gtk::ListStore> ref_tree_model = Gtk::ListStore::create(_columns);
-  _tree_view.set_model(ref_tree_model);
-  if(not(sim == nullptr)) 
-  {
-	for(size_t i = 0 ; i <sim->base_size() ; i++)
-	{
-	  double ressource   = sim->get_base(i)->get_ressources();
-	  double ressource_p = ressource *100/finR;
+	Glib::RefPtr<Gtk::ListStore> ref_tree_model = Gtk::ListStore::create(_columns);
+	_tree_view.set_model(ref_tree_model);
+	
+	if(not(sim == nullptr)){   
+		for(size_t i = 0 ; i <sim->base_size() ; i++)
+		{
+			double ressource   = sim->get_base(i)->get_ressources();
+			double ressource_p = ressource *100/finR;
 		
-	  auto row = *(ref_tree_model->append());
-	  row[_columns._col_nbP] = sim->get_base(i)->get_nbP();
-	  row[_columns._col_nbF] = sim->get_base(i)->get_nbF();
-	  row[_columns._col_nbT] = sim->get_base(i)->get_nbT();
-      row[_columns._col_nbC] = sim->get_base(i)->get_nbC();
-	  row[_columns._col_resource] = ressource;
-	  row[_columns._col_resource_percentage] = ressource_p;
-	}
-  }
+		  auto row = *(ref_tree_model->append());
+		  row[_columns._col_nbP] = sim->get_base(i)->get_nbP();
+		  row[_columns._col_nbF] = sim->get_base(i)->get_nbF();
+		  row[_columns._col_nbT] = sim->get_base(i)->get_nbT();
+		  row[_columns._col_nbC] = sim->get_base(i)->get_nbC();
+		  row[_columns._col_resource] = ressource;
+		  row[_columns._col_resource_percentage] = ressource_p;
+		}
+  } else  {
+		  auto row = *(ref_tree_model->append());
+		  row[_columns._col_nbP] = 0;
+		  row[_columns._col_nbF] = 0;
+		  row[_columns._col_nbT] = 0;
+		  row[_columns._col_nbC] = 0;
+		  row[_columns._col_resource] = 0;
+		  row[_columns._col_resource_percentage] = 0;
+	 }
 }
 
 
@@ -263,9 +272,8 @@ void ButtonBox::on_button_clicked_Open(){
 			sim=shared_ptr<Simulation>(new Simulation());
 			sim->lecture(filename);	
 			if (sim->get_erreur()) {
-				//draw_white();}
+				sim= nullptr;
 			}
-			//} else {cout <<" Don't Delete this bullshit " << endl;}
 			break;
 		}
 		case(Gtk::RESPONSE_CANCEL):{
@@ -383,11 +391,11 @@ bool MyArea::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 	graphic_set_context(cr);
 	orthographic_projection(cr,DEFAULT_SIZE, DEFAULT_SIZE);
 	dessin_cadre(height,width);
-	
-	draw_gisements(height,width);
-	draw_bases(height, width);
-	cr->set_source_rgb(0,0,0);
-	
+	if (not (sim==nullptr)){
+		draw_gisements(height,width);
+		draw_bases(height, width);
+		cr->set_source_rgb(0,0,0);
+	}
 
 	
   return true;
@@ -459,10 +467,10 @@ void draw_bases(int height, int width){
 				sim->get_base(i)->get_robot(j)->get_centre().dessin('R', rayon_comm);
 				}
 				set_couleur_base(sim->get_base(i)->get_couleur());
-			for(int k(0); k < sim-> get_base(i)->get_robot(j)->voisin_size();k++){
+			for(size_t k(0); k < sim-> get_base(i)->get_robot(j)->size_voisin();k++){
 				Vecteur V;
 				V.norme_vecteur(sim->get_base(i)->get_robot(j)->get_centre(),
-								sim->get_base(i)->get_robot(j)->get_voisin(k)
+								sim->get_base(i)->get_robot(j)->robot_voisins(k)
 								->get_centre());
 				
 				if (link2) {

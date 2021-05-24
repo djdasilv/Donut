@@ -31,8 +31,6 @@ class Robot{
 	
 	Point get_centre() const;
 	Point get_But () const; 
-	shared_ptr<Robot> get_voisin(int i) const;
-	int voisin_size()const;
 	
 	bool transformationStringBool ( std::string A ) ;
 	bool get_Comm_Base () const;
@@ -59,11 +57,16 @@ class Robot{
 	bool get_retour() const;
 	double get_x() const;
 	double get_y() const;
+	double voisin_uid(int i) const ;
+	shared_ptr<Robot> robot_voisins(int i ) const;
+	void set_voisin(shared_ptr<Robot> voisin);
+	size_t size_voisin() const;
+	void clear_voisins();
 	
-	vector <shared_ptr <Robot> > robots_voisins;
 		
 
 	protected:
+	vector <shared_ptr <Robot> > robots_voisins;
 	
 	int uid;  
 	
